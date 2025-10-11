@@ -5,10 +5,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.smarthome.smart_home.dto.DeviceStatusUpdateDTO;
 import com.smarthome.smart_home.model.Device;
+import com.smarthome.smart_home.enums.DeviceStatus;
+import com.smarthome.smart_home.enums.DeviceType;
 import com.smarthome.smart_home.service.DeviceService;
 
 import java.util.List;
 
+import org.apache.catalina.connector.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,8 +31,13 @@ public class DeviceController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Device>> getAllDevices(){
-        return ResponseEntity.ok(deviceService.getAllDevices());
+    public ResponseEntity<List<Device>> getAllDevices(@RequestParam(required = false) Long roomId, @RequestParam(required = false) DeviceType type, @RequestParam(required = false) DeviceStatus status){
+        if (roomId !=null || type != null || status != null) {
+            return ResponseEntity.ok(deviceService.getDevicesByFilters(roomId, type, status));
+        }
+        else {
+            return ResponseEntity.ok(deviceService.getAllDevices());
+        }
     }
 
     @GetMapping("/{id}")
@@ -41,6 +49,14 @@ public class DeviceController {
     public ResponseEntity<Device> updateDeviceStatus(@PathVariable Long id, @RequestBody DeviceStatusUpdateDTO updateDTO) {
         return ResponseEntity.ok(deviceService.updateDeviceStatus(id, updateDTO));
     }
+
+    // @GetMapping("/room/{roomId}")
+    // public ResponseEntity<List<Device>> getDevicesByRoom(@PathVariable Long roomId) {
+    //     return ResponseEntity.ok(deviceService.getDevicesByRoomId(roomId));
+    // }
+    
+    
+    
     
    
     

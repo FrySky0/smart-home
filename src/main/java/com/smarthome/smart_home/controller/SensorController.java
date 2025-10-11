@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.smarthome.smart_home.model.Sensor;
-import com.smarthome.smart_home.service.DeviceService;
+import com.smarthome.smart_home.enums.SensorType;
 import com.smarthome.smart_home.service.SensorService;
 
 import java.util.List;
@@ -23,11 +23,17 @@ public class SensorController {
         this.sensorService = sensorService;
     }
     @GetMapping
-    public ResponseEntity<List<Sensor>> getAllSensors() {
+    public ResponseEntity<List<Sensor>> getAllSensors(
+        @RequestParam(required = false) Long roomId,
+        @RequestParam(required = false) SensorType type
+    ) {
+        if (roomId != null || type != null){
+            return ResponseEntity.ok(sensorService.getSensorsByFilters(roomId, type));
+        }
         return ResponseEntity.ok(sensorService.getAllSensors());
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Sensor> getMethodName(@PathVariable Long id) {
+    public ResponseEntity<Sensor> getSensorById(@PathVariable Long id) {
         return ResponseEntity.ok(sensorService.getSensorById(id));
     }
     
