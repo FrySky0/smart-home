@@ -17,7 +17,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name="rooms")
+@Table(name = "rooms")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,15 +26,15 @@ public class Room {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
     private Integer floor;
 
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Device> devices = new ArrayList<>();
 
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Sensor> sensors = new ArrayList<>();
 }
