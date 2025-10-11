@@ -16,6 +16,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -27,25 +29,28 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Device {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
+    @NotBlank(message = "Device name is required")
     @Column(nullable = false)
     private String name;
-    
+
+    @NotNull(message = "Device type is required")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private DeviceType type;
-    
+
+    @NotNull(message = "Device status is required")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private DeviceStatus status;
 
+    @NotNull(message = "Room is required")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="room_id", nullable = false)
+    @JoinColumn(name = "room_id", nullable = false)
     private Room room;
-    
-    
+
 }

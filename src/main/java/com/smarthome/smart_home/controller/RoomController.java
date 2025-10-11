@@ -3,16 +3,18 @@ package com.smarthome.smart_home.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.smarthome.smart_home.dto.CreateRoomDTO;
 import com.smarthome.smart_home.dto.RoomDTO;
 import com.smarthome.smart_home.mappers.RoomMapper;
 import com.smarthome.smart_home.model.Room;
-import com.smarthome.smart_home.service.DeviceService;
 import com.smarthome.smart_home.service.RoomService;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.catalina.connector.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +33,7 @@ public class RoomController {
         this.roomMapper = roomMapper;
     }
 
+    // Получить все комнаты
     @GetMapping()
     public ResponseEntity<List<RoomDTO>> getAllRooms() {
         List<RoomDTO> roomDTOs = roomService.getAllRooms().stream()
@@ -39,8 +42,9 @@ public class RoomController {
         return ResponseEntity.ok(roomDTOs);
     }
 
+    // Получить комнату по ID
     @GetMapping("/{id}")
-    public ResponseEntity<RoomDTO> getRoomById(@PathVariable Long id) {
+    public ResponseEntity<RoomDTO> getRoomById(@PathVariable @NotNull Long id) {
         Room room = roomService.getRoomById(id);
         if (room != null) {
             return ResponseEntity.ok(roomMapper.toDTO(room));
@@ -49,6 +53,8 @@ public class RoomController {
         }
     }
 
+    // Поиск комнат по этажу или имени
+    // Пример: /api/rooms/search?floor=2
     @GetMapping("/search")
     public ResponseEntity<List<RoomDTO>> searchRooms(
             @RequestParam(required = false) Integer floor,
@@ -70,10 +76,12 @@ public class RoomController {
         return ResponseEntity.ok(roomDTOs);
     }
 
+    // Создать новую комнату
     @PostMapping()
-    public ResponseEntity<Room> createRoom(@RequestBody Room room) {
-
-        return ResponseEntity.ok(roomService.createRoom(room));
+    public ResponseEntity<RoomDTO> createRoom(@Valid @RequestBody CreateRoomDTO createRoomDTO) {
+        Room room = roomMapper.toEntity(createRoomDTO);
+        Room savedRoom = roomService.createRoom(room);
+        return ResponseEntity.ok(roomMapper.toDTO(savedRoom));
     }
 
 }

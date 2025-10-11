@@ -9,6 +9,8 @@ import com.smarthome.smart_home.enums.SensorType;
 import com.smarthome.smart_home.mappers.SensorMapper;
 import com.smarthome.smart_home.service.SensorService;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +30,7 @@ public class SensorController {
         this.sensorMapper = sensorMapper;
     }
 
+    // Получить все сенсоры, с возможностью фильтрации по комнате и типу
     @GetMapping
     public ResponseEntity<List<SensorDTO>> getAllSensors(
             @RequestParam(required = false) Long roomId,
@@ -46,8 +49,9 @@ public class SensorController {
         return ResponseEntity.ok(sensorDTOs);
     }
 
+    // Получить сенсор по ID
     @GetMapping("/{id}")
-    public ResponseEntity<SensorDTO> getSensorById(@PathVariable Long id) {
+    public ResponseEntity<SensorDTO> getSensorById(@PathVariable @NotNull Long id) {
         Sensor sensor = sensorService.getSensorById(id);
         return ResponseEntity.ok(sensorMapper.toDTO(sensor));
     }

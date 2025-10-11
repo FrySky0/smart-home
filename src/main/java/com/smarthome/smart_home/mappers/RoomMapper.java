@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.smarthome.smart_home.dto.CreateRoomDTO;
 import com.smarthome.smart_home.dto.RoomDTO;
 import com.smarthome.smart_home.model.Room;
 
@@ -17,6 +18,7 @@ public class RoomMapper {
         this.sensorMapper = sensorMapper;
     }
 
+    // Преобразование сущности Room в DTO
     public RoomDTO toDTO(Room room) {
         RoomDTO dto = new RoomDTO();
         dto.setId(room.getId());
@@ -33,5 +35,13 @@ public class RoomMapper {
                     room.getSensors().stream().map(sensorMapper::toDTO).collect(Collectors.toList()));
         }
         return dto;
+    }
+
+    // Преобразование DTO в сущность Room
+    public Room toEntity(CreateRoomDTO dto) {
+        Room room = new Room();
+        room.setName(dto.getName());
+        room.setFloor(dto.getFloor());
+        return room;
     }
 }

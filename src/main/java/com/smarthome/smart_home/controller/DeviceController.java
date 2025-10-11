@@ -11,6 +11,9 @@ import com.smarthome.smart_home.enums.DeviceType;
 import com.smarthome.smart_home.mappers.DeviceMapper;
 import com.smarthome.smart_home.service.DeviceService;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +37,7 @@ public class DeviceController {
         this.deviceMapper = deviceMapper;
     }
 
+    // Получить все устройства, с возможностью фильтрации по комнате, типу и статусу
     @GetMapping
     public ResponseEntity<List<DeviceDTO>> getAllDevices(
             @RequestParam(required = false) Long roomId,
@@ -53,22 +57,18 @@ public class DeviceController {
         return ResponseEntity.ok(deviceDTOs);
     }
 
+    // Получить устройство по ID
     @GetMapping("/{id}")
-    public ResponseEntity<DeviceDTO> getDeviceById(@PathVariable Long id) {
+    public ResponseEntity<DeviceDTO> getDeviceById(@PathVariable @NotNull Long id) {
         Device device = deviceService.getDeviceById(id);
         return ResponseEntity.ok(deviceMapper.toDTO(device));
     }
 
+    // Обновить статус устройства
     @PutMapping("/{id}")
-    public ResponseEntity<Device> updateDeviceStatus(@PathVariable Long id,
-            @RequestBody DeviceStatusUpdateDTO updateDTO) {
+    public ResponseEntity<DeviceDTO> updateDeviceStatus(@PathVariable @NotNull Long id,
+            @Valid @RequestBody DeviceStatusUpdateDTO updateDTO) {
         return ResponseEntity.ok(deviceService.updateDeviceStatus(id, updateDTO));
     }
-
-    // @GetMapping("/room/{roomId}")
-    // public ResponseEntity<List<Device>> getDevicesByRoom(@PathVariable Long
-    // roomId) {
-    // return ResponseEntity.ok(deviceService.getDevicesByRoomId(roomId));
-    // }
 
 }

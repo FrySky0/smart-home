@@ -7,6 +7,7 @@ import com.smarthome.smart_home.model.Sensor;
 
 @Component
 public class SensorMapper {
+    // Преобразование сущности Sensor в DTO
     public SensorDTO toDTO(Sensor sensor) {
         SensorDTO dto = new SensorDTO();
         dto.setId(sensor.getId());

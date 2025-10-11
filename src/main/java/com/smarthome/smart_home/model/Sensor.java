@@ -13,6 +13,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,23 +25,26 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Sensor {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
+    @NotBlank(message = "Sensor name is required")
     @Column(nullable = false)
     private String name;
-    
+
+    @NotNull(message = "Sensor type is required")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SensorType type;
-    
+
     @Column(nullable = false)
     private Double value;
-    
+
+    @NotNull(message = "Room is required")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="room_id", nullable = false)
+    @JoinColumn(name = "room_id", nullable = false)
     private Room room;
-    
+
 }

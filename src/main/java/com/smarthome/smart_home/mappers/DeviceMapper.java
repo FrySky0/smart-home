@@ -7,6 +7,7 @@ import com.smarthome.smart_home.model.Device;
 
 @Component
 public class DeviceMapper {
+    // Преобразование сущности Device в DTO
     public DeviceDTO toDTO(Device device) {
         DeviceDTO dto = new DeviceDTO();
         dto.setId(device.getId());
