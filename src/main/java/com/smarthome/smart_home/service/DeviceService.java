@@ -11,6 +11,7 @@ import com.smarthome.smart_home.enums.DeviceType;
 import com.smarthome.smart_home.exception.ResourceNotFoundException;
 import com.smarthome.smart_home.mappers.DeviceMapper;
 import com.smarthome.smart_home.model.Device;
+import com.smarthome.smart_home.model.Room;
 import com.smarthome.smart_home.repository.DeviceRepository;
 
 import jakarta.validation.ValidationException;
@@ -22,6 +23,7 @@ public class DeviceService {
 
     private final DeviceRepository deviceRepository;
     private final DeviceMapper deviceMapper;
+    private final RoomService roomService;
 
     public List<Device> getAllDevices() {
         return deviceRepository.findAll();
@@ -30,6 +32,31 @@ public class DeviceService {
     public Device getDeviceById(Long id) {
         return deviceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Device not found with id: " + id));
+    }
+
+    public Device createDevice(Device device, Long roomId) {
+        Room room = roomService.getRoomById(roomId);
+        device.setRoom(room);
+        device.setStatus(DeviceStatus.OFF);
+        return deviceRepository.save(device);
+    }
+
+    public Device updateDevice(Long id, Device deviceDetails, Long roomId) {
+        Device existingDevice = getDeviceById(id);
+        Room room = roomService.getRoomById(roomId);
+
+        existingDevice.setName(deviceDetails.getName());
+        existingDevice.setType(deviceDetails.getType());
+        existingDevice.setRoom(room);
+
+        return deviceRepository.save(existingDevice);
+    }
+
+    public void deleteDevice(Long id) {
+        if (!deviceRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Device not found with id: " + id);
+        }
+        deviceRepository.deleteById(id);
     }
 
     public DeviceDTO updateDeviceStatus(Long id, DeviceStatusUpdateDTO updateDTO) {

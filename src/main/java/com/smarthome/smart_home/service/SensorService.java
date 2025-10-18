@@ -1,12 +1,14 @@
 package com.smarthome.smart_home.service;
 
 import java.util.List;
+import java.util.Random;
 
 import org.springframework.stereotype.Service;
 
 import com.smarthome.smart_home.enums.SensorType;
 import com.smarthome.smart_home.exception.ResourceNotFoundException;
 import com.smarthome.smart_home.exception.ValidationException;
+import com.smarthome.smart_home.model.Room;
 import com.smarthome.smart_home.model.Sensor;
 import com.smarthome.smart_home.repository.SensorRepository;
 
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SensorService {
     private final SensorRepository sensorRepository;
+    private final RoomService roomService;
 
     public List<Sensor> getAllSensors() {
         return sensorRepository.findAll();
@@ -24,6 +27,31 @@ public class SensorService {
     public Sensor getSensorById(Long id) {
         return sensorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Sensor not found with id: " + id));
+    }
+
+    public Sensor createSensor(Sensor sensor, Long roomId) {
+        Room room = roomService.getRoomById(roomId);
+        sensor.setRoom(room);
+        sensor.setValue(new Random().nextDouble() * 100); // рандомное число от 0 до 100
+        return sensorRepository.save(sensor);
+    }
+
+    public Sensor updateSensor(Long id, Sensor sensorDetails, Long roomId) {
+        Sensor existingSensor = getSensorById(id);
+        Room room = roomService.getRoomById(roomId);
+
+        existingSensor.setName(sensorDetails.getName());
+        existingSensor.setType(sensorDetails.getType());
+        existingSensor.setRoom(room);
+
+        return sensorRepository.save(existingSensor);
+    }
+
+    public void deleteSensor(Long id) {
+        if (!sensorRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Sensor not found with id: " + id);
+        }
+        sensorRepository.deleteById(id);
     }
 
     public List<Sensor> getSensorsByRoomId(Long roomId) {

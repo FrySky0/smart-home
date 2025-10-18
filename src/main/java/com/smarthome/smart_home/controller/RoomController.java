@@ -1,6 +1,7 @@
 package com.smarthome.smart_home.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.smarthome.smart_home.dto.CreateRoomDTO;
@@ -15,11 +16,14 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
@@ -84,4 +88,19 @@ public class RoomController {
         return ResponseEntity.ok(roomMapper.toDTO(savedRoom));
     }
 
+    // Обновить комнату
+    @PutMapping("/{id}")
+    public ResponseEntity<RoomDTO> updateRoom(@PathVariable @NotNull Long id,
+            @Valid @RequestBody CreateRoomDTO createRoomDTO) {
+        Room room = roomMapper.toEntity(createRoomDTO);
+        Room updatedRoom = roomService.updateRoom(id, room);
+        return ResponseEntity.ok(roomMapper.toDTO(updatedRoom));
+    }
+
+    // Удалить комнату
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRoom(@PathVariable @NotNull Long id) {
+        roomService.deleteRoom(id);
+        return ResponseEntity.noContent().build();
+    }
 }

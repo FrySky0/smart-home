@@ -48,4 +48,26 @@ public class RoomService {
         }
         return roomRepository.save(room);
     }
+
+    public Room updateRoom(Long id, Room roomDetails) {
+        Room existingRoom = getRoomById(id);
+
+        if (roomDetails.getName() == null || roomDetails.getName().isEmpty()) {
+            throw new ValidationException("Room name is required");
+        }
+        if (roomDetails.getFloor() == null || roomDetails.getFloor() < 0) {
+            throw new ValidationException("Floor must be a positive number");
+        }
+
+        existingRoom.setName(roomDetails.getName());
+        existingRoom.setFloor(roomDetails.getFloor());
+        return roomRepository.save(existingRoom);
+    }
+
+    public void deleteRoom(Long id) {
+        if (!roomRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Room not found with id: " + id);
+        }
+        roomRepository.deleteById(id);
+    }
 }
