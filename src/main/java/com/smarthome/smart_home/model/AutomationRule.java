@@ -2,9 +2,12 @@ package com.smarthome.smart_home.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -22,20 +25,21 @@ public class AutomationRule {
     private Long id;
 
     @NotBlank
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String name;
 
     private String description;
-
-    // private Device triggerDevice;
-    // private Sensor triggerSensor;
-
-    private Long triggerDeviceId; // какой девайс будет изменен при триггере правила
-    private Long triggerSensorId; // сенсор, который будет триггерить правило
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trigger_device_id", nullable = false)
+    private Device triggerDevice;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trigger_sensor_id", nullable = false)
+    private Sensor triggerSensor;
 
     private boolean enabled = true;
 
     private String triggerEvent; // greater или less
     private Integer triggerValue; // значение сенсора по которому триггерится правило
     private String action; // как девайс будет изменен, turnOn или turnOff
+
 }

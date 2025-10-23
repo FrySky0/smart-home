@@ -10,6 +10,7 @@ import com.smarthome.smart_home.mappers.RoomMapper;
 import com.smarthome.smart_home.model.Room;
 import com.smarthome.smart_home.service.RoomService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/rooms")
+@Tag(name = "Rooms", description = "Управление комнатами")
 public class RoomController {
     private final RoomService roomService;
     private final RoomMapper roomMapper;
@@ -76,8 +78,7 @@ public class RoomController {
                     .collect(Collectors.toList());
         } else if (id != null) {
             roomDTOs.add(roomMapper.toDTO(roomService.getRoomById(id)));
-        } 
-        else {
+        } else {
             roomDTOs = roomService.getAllRooms().stream()
                     .map(roomMapper::toDTO)
                     .collect(Collectors.toList());

@@ -34,14 +34,13 @@ public class DeviceService {
                 .orElseThrow(() -> new ResourceNotFoundException("Device not found with id: " + id));
     }
 
-    public Device turnOff(Long id) {
-        Device device = getDeviceById(id);
+    public Device turnOff(Device device) {
         device.setStatus(DeviceStatus.OFF);
         return deviceRepository.save(device);
     }
 
-    public Device turnOn(Long id) {
-        Device device = getDeviceById(id);
+    public Device turnOn(Device device) {
+
         device.setStatus(DeviceStatus.ON);
         return deviceRepository.save(device);
     }

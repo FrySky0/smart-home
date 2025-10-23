@@ -11,6 +11,7 @@ import com.smarthome.smart_home.enums.SensorType;
 import com.smarthome.smart_home.mappers.SensorMapper;
 import com.smarthome.smart_home.service.SensorService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/sensors")
+@Tag(name = "Sensors", description = "Управление сенсорами")
 public class SensorController {
     private final SensorService sensorService;
     private final SensorMapper sensorMapper;

@@ -3,14 +3,17 @@ package com.smarthome.smart_home.service;
 import java.util.List;
 import java.util.Random;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import com.smarthome.smart_home.enums.SensorType;
+import com.smarthome.smart_home.events.SensorUpdatedEvent;
 import com.smarthome.smart_home.exception.ResourceNotFoundException;
 import com.smarthome.smart_home.exception.ValidationException;
 import com.smarthome.smart_home.model.Room;
 import com.smarthome.smart_home.model.Sensor;
 import com.smarthome.smart_home.repository.SensorRepository;
+import com.smarthome.smart_home.service.automation.AutomationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +22,8 @@ import lombok.RequiredArgsConstructor;
 public class SensorService {
     private final SensorRepository sensorRepository;
     private final RoomService roomService;
-    private final AutomationService automationService;
+    // private final AutomationService automationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public List<Sensor> getAllSensors() {
         return sensorRepository.findAll();
@@ -34,7 +38,7 @@ public class SensorService {
         Room room = roomService.getRoomById(roomId);
         sensor.setRoom(room);
         sensor.setValue(new Random().nextDouble() * 100); // рандомное число от 0 до 100
-        automationService.sensorTrigger(sensor);
+        eventPublisher.publishEvent(new SensorUpdatedEvent(sensor)); // публикуем событие обновления сенсора
         return sensorRepository.save(sensor);
     }
 

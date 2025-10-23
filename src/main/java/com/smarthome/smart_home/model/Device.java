@@ -1,7 +1,5 @@
 package com.smarthome.smart_home.model;
 
-import java.util.List;
-
 import com.smarthome.smart_home.enums.DeviceStatus;
 import com.smarthome.smart_home.enums.DeviceType;
 

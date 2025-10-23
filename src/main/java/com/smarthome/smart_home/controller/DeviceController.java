@@ -13,6 +13,7 @@ import com.smarthome.smart_home.enums.DeviceType;
 import com.smarthome.smart_home.mappers.DeviceMapper;
 import com.smarthome.smart_home.service.DeviceService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/devices")
+@Tag(name = "Devices", description = "Управление устройствами")
 public class DeviceController {
     private final DeviceService deviceService;
     private final DeviceMapper deviceMapper;
