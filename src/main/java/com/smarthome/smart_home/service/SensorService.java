@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class SensorService {
     private final SensorRepository sensorRepository;
     private final RoomService roomService;
+    private final AutomationService automationService;
 
     public List<Sensor> getAllSensors() {
         return sensorRepository.findAll();
@@ -33,6 +34,7 @@ public class SensorService {
         Room room = roomService.getRoomById(roomId);
         sensor.setRoom(room);
         sensor.setValue(new Random().nextDouble() * 100); // рандомное число от 0 до 100
+        automationService.sensorTrigger(sensor);
         return sensorRepository.save(sensor);
     }
 

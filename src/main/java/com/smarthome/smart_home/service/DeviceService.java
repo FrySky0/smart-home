@@ -34,6 +34,18 @@ public class DeviceService {
                 .orElseThrow(() -> new ResourceNotFoundException("Device not found with id: " + id));
     }
 
+    public Device turnOff(Long id) {
+        Device device = getDeviceById(id);
+        device.setStatus(DeviceStatus.OFF);
+        return deviceRepository.save(device);
+    }
+
+    public Device turnOn(Long id) {
+        Device device = getDeviceById(id);
+        device.setStatus(DeviceStatus.ON);
+        return deviceRepository.save(device);
+    }
+
     public Device createDevice(Device device, Long roomId) {
         Room room = roomService.getRoomById(roomId);
         device.setRoom(room);

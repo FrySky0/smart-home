@@ -30,3 +30,6 @@ INSERT INTO sensors (name, type, value, room_id) VALUES
 ('Температура в спальне', 'TEMPERATURE', 21.0, 3),
 ('Датчик движения в спальне', 'MOTION', 0.0, 3),
 ('Датчик у входной двери', 'MOTION', 0.0, 4);
+
+INSERT INTO automation_rules (name, trigger_device_id, trigger_sensor_id, enabled, trigger_event, trigger_value, action) VALUES 
+('Отключить кондиционер в спальне', 7, 6, true, 'greater', 20, 'turnOff');

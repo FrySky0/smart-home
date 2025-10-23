@@ -13,6 +13,7 @@ import com.smarthome.smart_home.service.RoomService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,9 +62,10 @@ public class RoomController {
     // Пример: /api/rooms/search?floor=2
     @GetMapping("/search")
     public ResponseEntity<List<RoomDTO>> searchRooms(
+            @RequestParam(required = false) Long id,
             @RequestParam(required = false) Integer floor,
             @RequestParam(required = false) String name) {
-        List<RoomDTO> roomDTOs;
+        List<RoomDTO> roomDTOs = new ArrayList<>();
         if (floor != null) {
             roomDTOs = roomService.getRoomsByFloor(floor).stream()
                     .map(roomMapper::toDTO)
@@ -72,7 +74,10 @@ public class RoomController {
             roomDTOs = roomService.findRoomsByName(name).stream()
                     .map(roomMapper::toDTO)
                     .collect(Collectors.toList());
-        } else {
+        } else if (id != null) {
+            roomDTOs.add(roomMapper.toDTO(roomService.getRoomById(id)));
+        } 
+        else {
             roomDTOs = roomService.getAllRooms().stream()
                     .map(roomMapper::toDTO)
                     .collect(Collectors.toList());
