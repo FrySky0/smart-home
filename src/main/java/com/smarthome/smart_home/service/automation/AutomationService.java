@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 
 import com.smarthome.smart_home.dto.automation.AutomationRuleDTO;
 import com.smarthome.smart_home.dto.automation.AutomationRuleResponseDTO;
+import com.smarthome.smart_home.enums.automation.Action;
+import com.smarthome.smart_home.enums.automation.TriggerEvent;
 import com.smarthome.smart_home.events.SensorUpdatedEvent;
 import com.smarthome.smart_home.mappers.AutomationRuleMapper;
 import com.smarthome.smart_home.model.AutomationRule;
@@ -40,11 +42,11 @@ public class AutomationService {
 
     public List<AutomationRule> getRulesByFilters(
             Boolean enabled,
-            String triggerEvent,
+            TriggerEvent triggerEvent,
             Integer triggerValue,
             Long triggerDeviceId,
             Long triggerSensorId,
-            String action) {
+            Action action) {
         return automationRepository.findByFilters(enabled, triggerEvent, triggerValue, triggerDeviceId, triggerSensorId,
                 action);
     }
@@ -148,20 +150,28 @@ public class AutomationService {
     }
 
     private boolean checkCondition(AutomationRule rule, Sensor sensor) {
-        if (rule.getTriggerEvent().equals("greater")) {
-            return sensor.getValue() > rule.getTriggerValue();
-        } else if (rule.getTriggerEvent().equals("less")) {
-            return sensor.getValue() < rule.getTriggerValue();
-        } else {
-            return false;
+        switch (rule.getTriggerEvent()) {
+            case GREATER_THAN:
+                return sensor.getValue() > rule.getTriggerValue();
+            case LESS_THAN:
+                return sensor.getValue() < rule.getTriggerValue();
+            case EQUALS:
+                return sensor.getValue().equals(rule.getTriggerValue());
+            default:
+                return false;
         }
     }
 
     private void goAction(AutomationRule rule) {
-        if (rule.getAction().equals("turnOn")) {
-            deviceService.turnOn(rule.getTriggerDevice());
-        } else if (rule.getAction().equals("turnOff")) {
-            deviceService.turnOff(rule.getTriggerDevice());
+        switch (rule.getAction()) {
+            case TURN_ON:
+                deviceService.turnOn(rule.getTriggerDevice());
+                break;
+            case TURN_OFF:
+                deviceService.turnOff(rule.getTriggerDevice());
+                break;
+            default:
+                break;
         }
     }
 }

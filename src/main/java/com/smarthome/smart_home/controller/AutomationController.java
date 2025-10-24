@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.smarthome.smart_home.dto.automation.AutomationRuleDTO;
 import com.smarthome.smart_home.dto.automation.AutomationRuleResponseDTO;
+import com.smarthome.smart_home.enums.automation.Action;
+import com.smarthome.smart_home.enums.automation.TriggerEvent;
 import com.smarthome.smart_home.mappers.AutomationRuleMapper;
 import com.smarthome.smart_home.model.AutomationRule;
 import com.smarthome.smart_home.service.automation.AutomationService;
@@ -39,11 +41,11 @@ public class AutomationController {
     @GetMapping()
     public ResponseEntity<List<AutomationRuleResponseDTO>> getAllRules(
             @RequestParam(required = false) Boolean enabled,
-            @RequestParam(required = false) String triggerEvent,
+            @RequestParam(required = false) TriggerEvent triggerEvent,
             @RequestParam(required = false) Integer triggerValue,
             @RequestParam(required = false) Long triggerDeviceId,
             @RequestParam(required = false) Long triggerSensorId,
-            @RequestParam(required = false) String action) {
+            @RequestParam(required = false) Action action) {
         List<AutomationRule> rules;
         if (enabled != null || triggerEvent != null || triggerValue != null || triggerDeviceId != null
                 || triggerSensorId != null || action != null) {

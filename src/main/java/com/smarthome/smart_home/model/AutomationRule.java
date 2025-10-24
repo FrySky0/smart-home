@@ -1,7 +1,12 @@
 package com.smarthome.smart_home.model;
 
+import com.smarthome.smart_home.enums.automation.Action;
+import com.smarthome.smart_home.enums.automation.TriggerEvent;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,9 +42,10 @@ public class AutomationRule {
     private Sensor triggerSensor;
 
     private boolean enabled = true;
-
-    private String triggerEvent; // greater или less
-    private Integer triggerValue; // значение сенсора по которому триггерится правило
-    private String action; // как девайс будет изменен, turnOn или turnOff
+    @Enumerated(EnumType.STRING)
+    private TriggerEvent triggerEvent; // больше, меньше или равно (для сенсора)
+    private Double triggerValue; // значение сенсора по которому триггерится правило
+    @Enumerated(EnumType.STRING)
+    private Action action; // как девайс будет изменен
 
 }

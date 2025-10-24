@@ -1,5 +1,8 @@
 package com.smarthome.smart_home.dto.automation;
 
+import com.smarthome.smart_home.enums.automation.Action;
+import com.smarthome.smart_home.enums.automation.TriggerEvent;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -10,8 +13,8 @@ public class AutomationRuleDTO {
     private String description;
     private Long triggerDeviceId;
     private Long triggerSensorId;
-    private String triggerEvent;
-    private Integer triggerValue;
-    private String action;
+    private TriggerEvent triggerEvent;
+    private Double triggerValue;
+    private Action action;
 
 }

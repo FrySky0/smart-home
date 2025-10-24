@@ -31,5 +31,7 @@ INSERT INTO sensors (name, type, value, room_id) VALUES
 ('Датчик движения в спальне', 'MOTION', 0.0, 3),
 ('Датчик у входной двери', 'MOTION', 0.0, 4);
 
-INSERT INTO automation_rules (name, trigger_device_id, trigger_sensor_id, enabled, trigger_event, trigger_value, action) VALUES 
-('Отключить кондиционер в спальне', 7, 6, true, 'greater', 20, 'turnOff');
+INSERT INTO automation_rules (name, description, trigger_device_id, trigger_sensor_id, enabled, trigger_event, trigger_value, action) VALUES 
+('Отключить кондиционер в спальне', 'Отключает кондиционер в спальне при превышении температуры', 7, 6, true, 'GREATER_THAN', 20, 'TURN_OFF'),
+('Включить свет в гостиной при движении', 'Включает свет в гостиной при обнаружении движения', 1, 2, true, 'EQUALS', 1, 'TURN_ON'),
+('Выключить кухонный свет при низкой освещенности', 'Выключает кухонный свет при низкой освещенности', 4, 3, true, 'LESS_THAN', 300, 'TURN_OFF');
