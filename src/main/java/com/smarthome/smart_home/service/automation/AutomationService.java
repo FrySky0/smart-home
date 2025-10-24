@@ -71,6 +71,56 @@ public class AutomationService {
         return automationRuleMapper.toResponseDTO(rule);
     }
 
+    public AutomationRuleResponseDTO updateRule(Long id, AutomationRuleDTO dto) {
+        AutomationRule existingRule = automationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Automation rule not found with id: " + id));
+        Device device = deviceService.getDeviceById(dto.getTriggerDeviceId());
+        Sensor sensor = sensorService.getSensorById(dto.getTriggerSensorId());
+        existingRule.setName(dto.getName());
+        existingRule.setDescription(dto.getDescription());
+        existingRule.setTriggerDevice(device);
+        existingRule.setTriggerSensor(sensor);
+        existingRule.setTriggerEvent(dto.getTriggerEvent());
+        existingRule.setTriggerValue(dto.getTriggerValue());
+        existingRule.setAction(dto.getAction());
+        automationRepository.save(existingRule);
+        return automationRuleMapper.toResponseDTO(existingRule);
+    }
+
+    public AutomationRuleResponseDTO partiallyUpdateRule(Long id, AutomationRuleDTO dto) {
+        AutomationRule existingRule = automationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Automation rule not found with id: " + id));
+        if (dto.getName() != null) {
+            existingRule.setName(dto.getName());
+        }
+        if (dto.getDescription() != null) {
+            existingRule.setDescription(dto.getDescription());
+        }
+        if (dto.getTriggerDeviceId() != null) {
+            Device device = deviceService.getDeviceById(dto.getTriggerDeviceId());
+            existingRule.setTriggerDevice(device);
+        }
+        if (dto.getTriggerSensorId() != null) {
+            Sensor sensor = sensorService.getSensorById(dto.getTriggerSensorId());
+            existingRule.setTriggerSensor(sensor);
+        }
+        if (dto.getTriggerEvent() != null) {
+            existingRule.setTriggerEvent(dto.getTriggerEvent());
+        }
+        if (dto.getTriggerValue() != null) {
+            existingRule.setTriggerValue(dto.getTriggerValue());
+        }
+        if (dto.getAction() != null) {
+            existingRule.setAction(dto.getAction());
+        }
+        automationRepository.save(existingRule);
+        return automationRuleMapper.toResponseDTO(existingRule);
+    }
+
+    public void deleteRule(Long id) {
+        automationRepository.deleteById(id);
+    }
+
     // Триггер сенсора
     // public void sensorTrigger(Sensor sensor) {
     // List<AutomationRule> rules =

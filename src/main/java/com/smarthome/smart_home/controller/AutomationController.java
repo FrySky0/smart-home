@@ -15,8 +15,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -64,6 +68,26 @@ public class AutomationController {
     public ResponseEntity<AutomationRuleResponseDTO> createAutomationRule(
             @Valid @RequestBody AutomationRuleDTO automationRuleDTO) {
         return ResponseEntity.ok(automationService.createRule(automationRuleDTO));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AutomationRuleResponseDTO> updateRule(
+            @Valid @RequestBody AutomationRuleDTO automationRuleDTO,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(automationService.updateRule(id, automationRuleDTO));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<AutomationRuleResponseDTO> partiallyUpdateRule(
+            @RequestBody AutomationRuleDTO automationRuleDTO,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(automationService.partiallyUpdateRule(id, automationRuleDTO));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAutomationRule(@PathVariable Long id) {
+        automationService.deleteRule(id);
+        return ResponseEntity.noContent().build();
     }
 
 }
