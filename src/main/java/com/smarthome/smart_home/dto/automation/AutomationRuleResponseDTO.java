@@ -18,4 +18,5 @@ public class AutomationRuleResponseDTO {
     private TriggerEvent triggerEvent;
     private Double triggerValue;
     private Action action;
+    private Double actionValue;
 }

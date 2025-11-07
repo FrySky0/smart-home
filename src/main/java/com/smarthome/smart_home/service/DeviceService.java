@@ -80,7 +80,12 @@ public class DeviceService {
         deviceRepository.save(device);
         return deviceMapper.toDTO(device);
     }
+    public Device setValue(Device device, Double value) {
+        device.setValue(value);
+        
+        return deviceRepository.save(device);
 
+    }
     public List<Device> getDevicesByRoomId(Long id) {
         return deviceRepository.findByRoomId(id);
     }

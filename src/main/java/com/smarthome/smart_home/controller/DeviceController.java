@@ -77,7 +77,10 @@ public class DeviceController {
         Device savedDevice = deviceService.createDevice(device, createDeviceDTO.getRoomId());
         return ResponseEntity.status(HttpStatus.CREATED).body(deviceMapper.toDTO(savedDevice));
     }
-
+    @PutMapping("/{id}/setValue")
+    public Device putMethodName(@PathVariable @NotNull Long id, @RequestBody Double value) {
+        return deviceService.setValue(deviceService.getDeviceById(id), value);
+    }
     // Обновить устройство
     @PutMapping("/{id}")
     public ResponseEntity<DeviceDTO> updateDevice(@PathVariable @NotNull Long id,

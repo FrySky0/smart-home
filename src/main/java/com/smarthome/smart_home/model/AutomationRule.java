@@ -47,5 +47,6 @@ public class AutomationRule {
     private Double triggerValue; // значение сенсора по которому триггерится правило
     @Enumerated(EnumType.STRING)
     private Action action; // как девайс будет изменен
+    private Double actionValue; // значение которое будет применено к девайсу
 
 }

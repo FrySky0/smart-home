@@ -16,6 +16,7 @@ public class DeviceMapper {
         dto.setType(device.getType());
         dto.setStatus(device.getStatus());
         dto.setRoomId(device.getRoom().getId());
+        dto.setValue(device.getValue());
         return dto;
     }
 

@@ -50,5 +50,7 @@ public class Device {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
+    
+    private Double value;
 
 }

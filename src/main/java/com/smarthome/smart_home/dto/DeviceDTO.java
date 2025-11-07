@@ -12,6 +12,7 @@ public class DeviceDTO {
     private DeviceType type;
     private DeviceStatus status;
     private Long roomId; // возвращаем только id комнаты, вместо объекта
+    private Double value;
 
     public Long getRoomId() {
         return roomId;

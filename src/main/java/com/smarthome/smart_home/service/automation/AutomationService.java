@@ -46,9 +46,10 @@ public class AutomationService {
             Integer triggerValue,
             Long triggerDeviceId,
             Long triggerSensorId,
-            Action action) {
+            Action action,
+            Double actionValue) {
         return automationRepository.findByFilters(enabled, triggerEvent, triggerValue, triggerDeviceId, triggerSensorId,
-                action);
+                action, actionValue);
     }
 
     // Затриггерить все правила
@@ -65,8 +66,12 @@ public class AutomationService {
     }
 
     public AutomationRuleResponseDTO createRule(AutomationRuleDTO dto) {
-        System.out.println("Creating automation rule: " + dto);
         Device device = deviceService.getDeviceById(dto.getTriggerDeviceId());
+        if (!device.getType().hasValue() && dto.getAction() == Action.SET_VALUE) {
+            throw new RuntimeException("Device with type " + device.getType() + " does not have a value");
+        }
+        System.out.println("Device: " + device.getType().hasValue());
+        System.out.println("action:" + dto.getAction());
         Sensor sensor = sensorService.getSensorById(dto.getTriggerSensorId());
         AutomationRule rule = automationRuleMapper.toEntity(dto, device, sensor);
         automationRepository.save(rule);
@@ -85,6 +90,7 @@ public class AutomationService {
         existingRule.setTriggerEvent(dto.getTriggerEvent());
         existingRule.setTriggerValue(dto.getTriggerValue());
         existingRule.setAction(dto.getAction());
+        existingRule.setActionValue(dto.getActionValue());
         automationRepository.save(existingRule);
         return automationRuleMapper.toResponseDTO(existingRule);
     }
@@ -115,6 +121,9 @@ public class AutomationService {
         if (dto.getAction() != null) {
             existingRule.setAction(dto.getAction());
         }
+        if (dto.getActionValue() != null) {
+            existingRule.setActionValue(dto.getActionValue());
+        }
         automationRepository.save(existingRule);
         return automationRuleMapper.toResponseDTO(existingRule);
     }
@@ -122,21 +131,6 @@ public class AutomationService {
     public void deleteRule(Long id) {
         automationRepository.deleteById(id);
     }
-
-    // Триггер сенсора
-    // public void sensorTrigger(Sensor sensor) {
-    // List<AutomationRule> rules =
-    // automationRepository.findByEnabledAndTriggerSensorId(true, sensor.getId());
-    // // List<AutomationRule> actionedRules = new ArrayList<>();
-    // for (AutomationRule rule : rules) {
-    // if (checkCondition(rule, sensor)) {
-    // goAction(rule);
-    // // actionedRules.add(rule);
-    // }
-    // }
-    // // return actionedRules;
-
-    // }
 
     @EventListener
     public void sensorTrigger(SensorUpdatedEvent event) {
@@ -170,6 +164,8 @@ public class AutomationService {
             case TURN_OFF:
                 deviceService.turnOff(rule.getTriggerDevice());
                 break;
+            case SET_VALUE:
+                deviceService.setValue(rule.getTriggerDevice(), rule.getActionValue());
             default:
                 break;
         }

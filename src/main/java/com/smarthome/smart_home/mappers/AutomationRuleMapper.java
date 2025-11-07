@@ -27,6 +27,7 @@ public class AutomationRuleMapper {
         rule.setTriggerEvent(dto.getTriggerEvent());
         rule.setTriggerValue(dto.getTriggerValue());
         rule.setAction(dto.getAction());
+        rule.setActionValue(dto.getActionValue());
         return rule;
     }
 
@@ -41,6 +42,7 @@ public class AutomationRuleMapper {
         dto.setTriggerEvent(rule.getTriggerEvent());
         dto.setTriggerValue(rule.getTriggerValue());
         dto.setAction(rule.getAction());
+        dto.setActionValue(rule.getActionValue());
         return dto;
     }
 
@@ -53,6 +55,7 @@ public class AutomationRuleMapper {
         dto.setTriggerEvent(rule.getTriggerEvent());
         dto.setTriggerValue(rule.getTriggerValue());
         dto.setAction(rule.getAction());
+        dto.setActionValue(rule.getActionValue());
         return dto;
     }
 

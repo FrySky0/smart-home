@@ -45,12 +45,14 @@ public class AutomationController {
             @RequestParam(required = false) Integer triggerValue,
             @RequestParam(required = false) Long triggerDeviceId,
             @RequestParam(required = false) Long triggerSensorId,
-            @RequestParam(required = false) Action action) {
+            @RequestParam(required = false) Action action,
+            @RequestParam(required = false) Double actionValue
+            ) {
         List<AutomationRule> rules;
         if (enabled != null || triggerEvent != null || triggerValue != null || triggerDeviceId != null
-                || triggerSensorId != null || action != null) {
+                || triggerSensorId != null || action != null || actionValue != null) {
             rules = automationService.getRulesByFilters(enabled, triggerEvent, triggerValue, triggerDeviceId,
-                    triggerSensorId, action);
+                    triggerSensorId, action, actionValue);
         } else {
             rules = automationService.getAllRules();
         }
