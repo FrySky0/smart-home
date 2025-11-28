@@ -4,7 +4,10 @@ spring:
     version: "0.2"
   profiles:
     active: dev
-
+jwt:
+  secret: w9DR5HWM0XpycWjt4JoRYaLRKQhfS6g5pg73KDFPL2vwk2UsXZ9ap48ZQwjbgmXvxxlqnVz6XGkk7Ul9LkUHYA==
+  expiration: 86400000
+  cookie-name: auth-token
 ---
 spring:
   config:
@@ -48,6 +51,7 @@ spring:
 
 server:
   port: 9001
+
 
 
 logging:

@@ -69,4 +69,19 @@ public class GlobalExceptionHandler {
                 request.getDescription(false));
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex, WebRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        if (ex.getMessage().contains("not found") || ex.getMessage().contains("Invalid credentials")) {
+            status = HttpStatus.UNAUTHORIZED;
+        }
+        
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                ex.getMessage(),
+                request.getDescription(false));
+        return new ResponseEntity<>(errorResponse, status);
+    }
 }
