@@ -50,8 +50,8 @@ public class AutomationRuleMapper {
         AutomationRuleDTO dto = new AutomationRuleDTO();
         dto.setName(rule.getName());
         dto.setDescription(rule.getDescription());
-        dto.setTriggerDeviceId(rule.getTriggerDevice().getId());
-        dto.setTriggerSensorId(rule.getTriggerSensor().getId());
+        dto.setTriggerDeviceUuid(rule.getTriggerDevice().getUuid());
+        dto.setTriggerDeviceUuid(rule.getTriggerSensor().getUuid());
         dto.setTriggerEvent(rule.getTriggerEvent());
         dto.setTriggerValue(rule.getTriggerValue());
         dto.setAction(rule.getAction());

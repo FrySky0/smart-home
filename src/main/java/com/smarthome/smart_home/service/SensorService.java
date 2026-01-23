@@ -2,6 +2,7 @@ package com.smarthome.smart_home.service;
 
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -15,7 +16,6 @@ import com.smarthome.smart_home.exception.ValidationException;
 import com.smarthome.smart_home.model.Room;
 import com.smarthome.smart_home.model.Sensor;
 import com.smarthome.smart_home.repository.SensorRepository;
-import com.smarthome.smart_home.service.automation.AutomationService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +44,17 @@ public class SensorService {
                     return new ResourceNotFoundException("Sensor not found with id: " + id);
                 });
         log.info("Successfully found sensor with ID: {} - {}", id, sensor.getName());
+        return sensor;
+    }
+
+    public Sensor getSensorByUuid(UUID uuid) {
+        log.debug("Looking for sensor with UUID: {}", uuid);
+        Sensor sensor = sensorRepository.findByUuid(uuid)
+                .orElseThrow(() -> {
+                    log.error("Sensor not found with UUID: {}", uuid);
+                    return new ResourceNotFoundException("Sensor not found with UUID: " + uuid);
+                });
+        log.info("Successfully found sensor with UUID: {} - {}", uuid, sensor.getName());
         return sensor;
     }
 

@@ -1,8 +1,10 @@
 package com.smarthome.smart_home.service;
 
 import java.util.List;
-import org.springframework.data.domain.Pageable;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.smarthome.smart_home.dto.DeviceDTO;
@@ -53,7 +55,16 @@ public class DeviceService {
         log.info("Successfully fetched device with id: {}", id);
         return device;
     }
-
+    public Device getDeviceByUuid(UUID uuid){
+        log.debug("Fetching device by uuid: {}", uuid);
+        Device device = deviceRepository.findByUuid(uuid)
+                .orElseThrow(() -> {
+                    log.error("Device not found with id: {}", uuid);
+                    return new ResourceNotFoundException("Device not found with id: " + uuid);
+                });
+        log.info("Successfully fetched device with id: {}", uuid);
+        return device;
+    }
     public Device turnOff(Device device) {
         log.debug("Turning off device with id: {}", device.getId());
         device.setStatus(DeviceStatus.OFF);

@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Tag(name = "Configuration Import", description = "Загрузка конфигурации из файла")
 public class ConfigFileController {
-    private final FileService fileImportService;
+    private final FileService fileService;
 
     @Operation(summary= "Импорт комнат и устройств из JSON файла")
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -32,7 +32,7 @@ public class ConfigFileController {
         if (file.isEmpty()){
             return ResponseEntity.badRequest().body("File is empty");
         }
-        fileImportService.importConfiguration(file);
+        fileService.importConfiguration(file);
         return ResponseEntity.ok(Map.of(
             "message", "Configuration imported successfully",
             "fileName", file.getOriginalFilename()
@@ -42,7 +42,7 @@ public class ConfigFileController {
     @Operation(summary = "Экспорт всей конфигурации системы в JSON (Отчет)")
     @GetMapping("/export")
     public ResponseEntity<byte[]> exportConfig() {
-        byte[] data = fileImportService.exportConfigurationJSON();
+        byte[] data = fileService.exportConfigurationJSON();
         return ResponseEntity.ok()
             .header("Content-Disposition", "attachment; filename=smart_home_report.json")
             .contentType(MediaType.APPLICATION_JSON)

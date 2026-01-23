@@ -1,6 +1,8 @@
 package com.smarthome.smart_home.repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,7 @@ public interface SensorRepository extends JpaRepository<Sensor, Long> {
 
     List<Sensor> findByType(SensorType type);
 
+    Optional<Sensor> findByUuid(UUID uuid);
     List<Sensor> findByTypeAndValueGreaterThan(SensorType type, Double value);
 
     @Query("SELECT s FROM Sensor s WHERE " +

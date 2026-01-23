@@ -1,5 +1,7 @@
 package com.smarthome.smart_home.model;
 
+import java.util.UUID;
+
 import com.smarthome.smart_home.enums.DeviceStatus;
 import com.smarthome.smart_home.enums.DeviceType;
 
@@ -30,6 +32,9 @@ public class Device {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique=true, nullable=false)
+    private UUID uuid = UUID.randomUUID();
 
     @NotBlank(message = "Device name is required")
     @Column(nullable = false)

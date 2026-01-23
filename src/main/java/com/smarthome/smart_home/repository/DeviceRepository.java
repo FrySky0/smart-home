@@ -1,6 +1,8 @@
 package com.smarthome.smart_home.repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,8 +18,10 @@ import com.smarthome.smart_home.model.Device;
 @Repository
 public interface DeviceRepository extends JpaRepository<Device, Long> {
 
+
     List<Device> findByRoomId(Long roomId);
 
+    Optional<Device> findByUuid(UUID uuid);
     List<Device> findByType(DeviceType type);
 
     List<Device> findByStatus(DeviceStatus status);

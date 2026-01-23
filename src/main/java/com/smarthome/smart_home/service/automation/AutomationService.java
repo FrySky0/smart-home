@@ -8,14 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.smarthome.smart_home.model.Sensor;
-import com.smarthome.smart_home.repository.AutomationRepository;
-import com.smarthome.smart_home.repository.SensorRepository;
-import com.smarthome.smart_home.service.DeviceService;
-import com.smarthome.smart_home.service.SensorService;
-
-import lombok.RequiredArgsConstructor;
-
 import com.smarthome.smart_home.dto.automation.AutomationRuleDTO;
 import com.smarthome.smart_home.dto.automation.AutomationRuleResponseDTO;
 import com.smarthome.smart_home.enums.automation.Action;
@@ -24,7 +16,13 @@ import com.smarthome.smart_home.events.SensorUpdatedEvent;
 import com.smarthome.smart_home.mappers.AutomationRuleMapper;
 import com.smarthome.smart_home.model.AutomationRule;
 import com.smarthome.smart_home.model.Device;
+import com.smarthome.smart_home.model.Sensor;
+import com.smarthome.smart_home.repository.AutomationRepository;
+import com.smarthome.smart_home.repository.SensorRepository;
+import com.smarthome.smart_home.service.DeviceService;
+import com.smarthome.smart_home.service.SensorService;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -112,14 +110,14 @@ public class AutomationService {
     public AutomationRuleResponseDTO createRule(AutomationRuleDTO dto) {
         log.info("Creating new automation rule with name: {}", dto.getName());
 
-        Device device = deviceService.getDeviceById(dto.getTriggerDeviceId());
+        Device device = deviceService.getDeviceByUuid(dto.getTriggerDeviceUuid());
         if (!device.getType().hasValue() && dto.getAction() == Action.SET_VALUE) {
             log.error("Cannot create rule - device with type {} does not support SET_VALUE action", device.getType());
             throw new RuntimeException("Device with type " + device.getType() + " does not have a value");
         }
 
         log.debug("Device type validation passed for device: {}", device.getType());
-        Sensor sensor = sensorService.getSensorById(dto.getTriggerSensorId());
+        Sensor sensor = sensorService.getSensorByUuid(dto.getTriggerSensorUuid());
         AutomationRule rule = automationRuleMapper.toEntity(dto, device, sensor);
         automationRepository.save(rule);
 
@@ -136,8 +134,8 @@ public class AutomationService {
                     return new RuntimeException("Automation rule not found with id: " + id);
                 });
 
-        Device device = deviceService.getDeviceById(dto.getTriggerDeviceId());
-        Sensor sensor = sensorService.getSensorById(dto.getTriggerSensorId());
+        Device device = deviceService.getDeviceByUuid(dto.getTriggerDeviceUuid());
+        Sensor sensor = sensorService.getSensorByUuid(dto.getTriggerSensorUuid());
 
         log.debug("Updating rule properties for rule ID: {}", id);
         existingRule.setName(dto.getName());
@@ -172,14 +170,14 @@ public class AutomationService {
             log.debug("Updating rule description");
             existingRule.setDescription(dto.getDescription());
         }
-        if (dto.getTriggerDeviceId() != null) {
-            Device device = deviceService.getDeviceById(dto.getTriggerDeviceId());
-            log.debug("Updating trigger device to ID: {}", dto.getTriggerDeviceId());
+        if (dto.getTriggerDeviceUuid() != null) {
+            Device device = deviceService.getDeviceByUuid(dto.getTriggerDeviceUuid());
+            log.debug("Updating trigger device to ID: {}", dto.getTriggerDeviceUuid());
             existingRule.setTriggerDevice(device);
         }
-        if (dto.getTriggerSensorId() != null) {
-            Sensor sensor = sensorService.getSensorById(dto.getTriggerSensorId());
-            log.debug("Updating trigger sensor to ID: {}", dto.getTriggerSensorId());
+        if (dto.getTriggerSensorUuid() != null) {
+            Sensor sensor = sensorService.getSensorByUuid(dto.getTriggerSensorUuid());
+            log.debug("Updating trigger sensor to ID: {}", dto.getTriggerSensorUuid());
             existingRule.setTriggerSensor(sensor);
         }
         if (dto.getTriggerEvent() != null) {

@@ -48,6 +48,7 @@ public class FileService {
                     for (var deviceDto : roomDto.getDevices()){
                         Device device = new Device();
                         device.setName(deviceDto.getName());
+                        device.setUuid(deviceDto.getUuid());
                         device.setType(DeviceType.valueOf(deviceDto.getType()));
                         device.setStatus(DeviceStatus.OFF);
                         device.setRoom(savedRoom);
@@ -58,12 +59,14 @@ public class FileService {
                     for (var sensorDto : roomDto.getSensors()){
                         Sensor sensor = new Sensor();
                         sensor.setName(sensorDto.getName());
+                        sensor.setUuid(sensorDto.getUuid());
                         sensor.setType(SensorType.valueOf(sensorDto.getType()));
                         sensor.setValue(0.0);
                         sensor.setRoom(savedRoom);
                         savedRoom.getSensors().add(sensor);
                     }
                 }
+                
                 roomRepository.save(savedRoom);
             }
         } catch (IOException e) {

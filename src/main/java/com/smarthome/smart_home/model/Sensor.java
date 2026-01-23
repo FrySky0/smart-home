@@ -1,5 +1,7 @@
 package com.smarthome.smart_home.model;
 
+import java.util.UUID;
+
 import com.smarthome.smart_home.enums.SensorType;
 
 import jakarta.persistence.Column;
@@ -29,6 +31,9 @@ public class Sensor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique=true, nullable=false)
+    private UUID uuid = UUID.randomUUID();
 
     @NotBlank(message = "Sensor name is required")
     @Column(nullable = false)
