@@ -45,6 +45,7 @@ public class Sensor {
     @NotNull(message = "Room is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Room room;
 
 }
