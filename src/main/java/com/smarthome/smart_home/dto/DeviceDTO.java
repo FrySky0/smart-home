@@ -1,5 +1,7 @@
 package com.smarthome.smart_home.dto;
 
+import java.util.UUID;
+
 import com.smarthome.smart_home.enums.DeviceStatus;
 import com.smarthome.smart_home.enums.DeviceType;
 
@@ -12,6 +14,7 @@ public class DeviceDTO {
     private DeviceType type;
     private DeviceStatus status;
     private Long roomId; // возвращаем только id комнаты, вместо объекта
+    private UUID uuid;
     private Double value;
 
     public Long getRoomId() {

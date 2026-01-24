@@ -90,6 +90,19 @@ public class SensorService {
         return updatedSensor;
     }
 
+    public Sensor updateSensorValue(Long id, Double value) {
+        log.debug("Updating value of sensor with ID: {} to {}", id, value);
+        Sensor existingSensor = getSensorById(id);
+        existingSensor.setValue(value);
+
+        log.debug("Publishing SensorUpdatedEvent for sensor ID: {}", id);
+        eventPublisher.publishEvent(new SensorUpdatedEvent(existingSensor)); // publish sensor update event
+
+        Sensor updatedSensor = sensorRepository.save(existingSensor);
+        log.info("Successfully updated value of sensor with ID: {}", id);
+        return updatedSensor;
+    }
+
     public void deleteSensor(Long id) {
         log.debug("Attempting to delete sensor with ID: {}", id);
         if (!sensorRepository.existsById(id)) {

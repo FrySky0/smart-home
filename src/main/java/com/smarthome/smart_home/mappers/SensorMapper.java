@@ -16,6 +16,7 @@ public class SensorMapper {
         dto.setType(sensor.getType());
         dto.setValue(sensor.getValue());
         dto.setRoomId(sensor.getRoom().getId());
+        dto.setUuid(sensor.getUuid());
         return dto;
     }
 

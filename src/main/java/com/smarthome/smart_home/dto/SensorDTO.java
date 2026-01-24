@@ -1,5 +1,7 @@
 package com.smarthome.smart_home.dto;
 
+import java.util.UUID;
+
 import com.smarthome.smart_home.enums.SensorType;
 
 import lombok.Data;
@@ -11,6 +13,7 @@ public class SensorDTO {
     private SensorType type;
     private Double value;
     private Long roomId; // возвращаем только id комнаты, вместо объекта
+    private UUID uuid;
 
     public Long getRoomId() {
         return roomId;
