@@ -1,7 +1,6 @@
 package com.smarthome.smart_home.service;
 
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -9,6 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.smarthome.smart_home.dto.CreateSensorDTO;
+import com.smarthome.smart_home.dto.SensorUpdateDTO;
 import com.smarthome.smart_home.enums.SensorType;
 import com.smarthome.smart_home.events.SensorUpdatedEvent;
 import com.smarthome.smart_home.exception.ResourceNotFoundException;
@@ -58,48 +59,51 @@ public class SensorService {
         return sensor;
     }
 
-    public Sensor createSensor(Sensor sensor, Long roomId) {
-        log.debug("Creating new sensor for room ID: {}", roomId);
-        Room room = roomService.getRoomById(roomId);
+    public Sensor createSensor(CreateSensorDTO createSensorDTO) {
+        log.debug("Creating new sensor '{}' for room ID: {}", createSensorDTO.getName(), createSensorDTO.getRoomId());
+        Sensor sensor = new Sensor();
+        Room room = roomService.getRoomById(createSensorDTO.getRoomId());
+        sensor.setName(createSensorDTO.getName());
+        sensor.setType(createSensorDTO.getType());
         sensor.setRoom(room);
-        sensor.setValue(new Random().nextDouble() * 100); // random number from 0 to 100
-
-        log.debug("Setting initial sensor value: {}", sensor.getValue());
-        eventPublisher.publishEvent(new SensorUpdatedEvent(sensor)); // publish sensor update event
-
+        if (createSensorDTO.getValue() != null) {
+            sensor.setValue(createSensorDTO.getValue());
+        } else {
+            sensor.setValue(0.0);
+        }
         Sensor savedSensor = sensorRepository.save(sensor);
+        eventPublisher.publishEvent(new SensorUpdatedEvent(sensor));
         log.info("Successfully created sensor with ID: {} - {} in room: {}",
                 savedSensor.getId(), savedSensor.getName(), room.getName());
         return savedSensor;
     }
 
-    public Sensor updateSensor(Long id, Sensor sensorDetails, Long roomId) {
-        log.debug("Updating sensor with ID: {}", id);
+    public Sensor updateFull(Long id, SensorUpdateDTO sensorUpdateDTO){
+        log.debug("Fully updating sensor with id: {}", id);
         Sensor existingSensor = getSensorById(id);
-        Room room = roomService.getRoomById(roomId);
-
-        log.debug("Updating sensor details - Name: {}, Type: {}, Room ID: {}",
-                sensorDetails.getName(), sensorDetails.getType(), roomId);
-
-        existingSensor.setName(sensorDetails.getName());
-        existingSensor.setType(sensorDetails.getType());
+        Room room = roomService.getRoomById(sensorUpdateDTO.getRoomId());
+        existingSensor.setName(sensorUpdateDTO.getName());
+        existingSensor.setValue(sensorUpdateDTO.getValue());
         existingSensor.setRoom(room);
-
         Sensor updatedSensor = sensorRepository.save(existingSensor);
-        log.info("Successfully updated sensor with ID: {}", id);
+        log.debug("Successfully fully updated sensor with id: {}", id);
         return updatedSensor;
     }
 
-    public Sensor updateSensorValue(Long id, Double value) {
-        log.debug("Updating value of sensor with ID: {} to {}", id, value);
+    public Sensor updatePartially(Long id, SensorUpdateDTO sensorUpdateDTO){
+        log.debug("Partially updating sensor with id: {}", id);
         Sensor existingSensor = getSensorById(id);
-        existingSensor.setValue(value);
-
-        log.debug("Publishing SensorUpdatedEvent for sensor ID: {}", id);
-        eventPublisher.publishEvent(new SensorUpdatedEvent(existingSensor)); // publish sensor update event
-
+        if (sensorUpdateDTO.getName()!=null){
+            existingSensor.setName(sensorUpdateDTO.getName());
+        }
+        if (sensorUpdateDTO.getRoomId()!=null){
+            Room room = roomService.getRoomById(sensorUpdateDTO.getRoomId());
+            existingSensor.setRoom(room);
+        }
+        if (sensorUpdateDTO.getValue()!=null){
+            existingSensor.setValue(sensorUpdateDTO.getValue());
+        }
         Sensor updatedSensor = sensorRepository.save(existingSensor);
-        log.info("Successfully updated value of sensor with ID: {}", id);
         return updatedSensor;
     }
 

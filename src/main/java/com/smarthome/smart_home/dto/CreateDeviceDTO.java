@@ -1,5 +1,6 @@
 package com.smarthome.smart_home.dto;
 
+import com.smarthome.smart_home.enums.DeviceStatus;
 import com.smarthome.smart_home.enums.DeviceType;
 
 import jakarta.validation.constraints.NotBlank;
@@ -14,6 +15,10 @@ public class CreateDeviceDTO {
     @NotNull(message = "Device type is required")
     private DeviceType type;
 
+    private DeviceStatus status;
+
     @NotNull(message = "Room ID is required")
     private Long roomId;
+
+    private Double value;
 }

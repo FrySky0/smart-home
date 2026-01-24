@@ -1,27 +1,8 @@
 package com.smarthome.smart_home.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.smarthome.smart_home.model.Sensor;
-import com.smarthome.smart_home.dto.CreateSensorDTO;
-import com.smarthome.smart_home.dto.SensorDTO;
-import com.smarthome.smart_home.enums.SensorType;
-import com.smarthome.smart_home.mappers.SensorMapper;
-import com.smarthome.smart_home.service.SensorService;
-
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +13,22 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.smarthome.smart_home.dto.CreateSensorDTO;
+import com.smarthome.smart_home.dto.SensorDTO;
+import com.smarthome.smart_home.dto.SensorUpdateDTO;
+import com.smarthome.smart_home.enums.SensorType;
+import com.smarthome.smart_home.mappers.SensorMapper;
+import com.smarthome.smart_home.model.Sensor;
+import com.smarthome.smart_home.service.SensorService;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/sensors")
@@ -90,41 +86,37 @@ public class SensorController {
     // Создать новый сенсор
     @PostMapping
     public ResponseEntity<SensorDTO> createSensor(@Valid @RequestBody CreateSensorDTO createSensorDTO) {
-        log.info("Creating new sensor with name: {}, type: {}, roomId: {}",
-                createSensorDTO.getName(), createSensorDTO.getType(), createSensorDTO.getRoomId());
+        log.info("Creating new sensor with name: {}, type: {}, roomId: {}, value: {}",
+                createSensorDTO.getName(), createSensorDTO.getType(), createSensorDTO.getRoomId(), createSensorDTO.getValue());
 
-        Sensor sensor = sensorMapper.toEntity(createSensorDTO);
-        Sensor savedSensor = sensorService.createSensor(sensor, createSensorDTO.getRoomId());
-        SensorDTO savedSensorDTO = sensorMapper.toDTO(savedSensor);
+        Sensor sensor = sensorService.createSensor(createSensorDTO);
+        SensorDTO savedSensorDTO = sensorMapper.toDTO(sensor);
 
-        log.info("Successfully created sensor with ID: {}", savedSensor.getId());
+        log.info("Successfully created sensor with ID: {} and UUID: {}", sensor.getId(), sensor.getUuid());
         return ResponseEntity.status(HttpStatus.CREATED).body(savedSensorDTO);
     }
 
     // Обновить сенсор
     @PutMapping("/{id}")
-    public ResponseEntity<SensorDTO> updateSensor(@PathVariable @NotNull Long id,
-            @Valid @RequestBody CreateSensorDTO createSensorDTO) {
-        log.info("Updating sensor with ID: {}, new name: {}, new type: {}, new roomId: {}",
-                id, createSensorDTO.getName(), createSensorDTO.getType(), createSensorDTO.getRoomId());
+    public ResponseEntity<SensorDTO> updateSensorFull(@PathVariable @NotNull Long id,
+            @Valid @RequestBody SensorUpdateDTO sensorUpdateDTO) {
+        log.info("Fully updating sensor ID: {}", id);
+        Sensor sensor = sensorService.updateFull(id, sensorUpdateDTO);
+        SensorDTO sensorDTO = sensorMapper.toDTO(sensor);
 
-        Sensor sensor = sensorMapper.toEntity(createSensorDTO);
-        Sensor updatedSensor = sensorService.updateSensor(id, sensor, createSensorDTO.getRoomId());
-        SensorDTO updatedSensorDTO = sensorMapper.toDTO(updatedSensor);
-
-        log.info("Successfully updated sensor with ID: {}", id);
-        return ResponseEntity.ok(updatedSensorDTO);
+        log.info("The sensor with ID {} has been successfully fully updated", id);
+        return ResponseEntity.ok(sensorDTO);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<SensorDTO> updateSensorValue(@PathVariable @NotNull Long id,
-            @RequestParam @NotNull Double value) {
-        log.info("Updating value of sensor with ID: {} to {}", id, value);
+    public ResponseEntity<SensorDTO> updateSensorPartially(@PathVariable @NotNull Long id,
+            @RequestParam @NotNull SensorUpdateDTO sensorUpdateDTO) {
+        log.info("Partially updating sensor with ID: {}", id);
 
-        Sensor updatedSensor = sensorService.updateSensorValue(id, value);
+        Sensor updatedSensor = sensorService.updatePartially(id, sensorUpdateDTO);
         SensorDTO updatedSensorDTO = sensorMapper.toDTO(updatedSensor);
 
-        log.info("Successfully updated value of sensor with ID: {}", id);
+        log.info("The sensor with ID {} has been successfully partially updated", id);
         return ResponseEntity.ok(updatedSensorDTO);
     }
 

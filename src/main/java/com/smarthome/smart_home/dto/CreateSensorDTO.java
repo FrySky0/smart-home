@@ -16,4 +16,6 @@ public class CreateSensorDTO {
 
     @NotNull(message = "Room ID is required")
     private Long roomId;
+
+    private Double value;
 }

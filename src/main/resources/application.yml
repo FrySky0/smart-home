@@ -8,6 +8,22 @@ jwt:
   secret: w9DR5HWM0XpycWjt4JoRYaLRKQhfS6g5pg73KDFPL2vwk2UsXZ9ap48ZQwjbgmXvxxlqnVz6XGkk7Ul9LkUHYA==
   expiration: 86400000
   cookie-name: auth-token
+
+logging:
+  level:
+    com.smarthome.smart_home: DEBUG
+    org.springframework: INFO
+  file:
+    name: logs/smart-home-app.log
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} - [%thread] %-5level %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss} - [%thread] %-5level %logger{36} - %msg%n"
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
+      file-name-pattern: logs/smart-home-app.%d{yyyy-MM-dd}.%i.log
+
 ---
 spring:
   config:
@@ -51,20 +67,3 @@ spring:
 
 server:
   port: 9001
-
-
-
-logging:
-  level:
-    com.smarthome.smart_home: DEBUG
-    org.springframework: INFO
-  file:
-    name: logs/smart-home-app.log
-  pattern:
-    file: "%d{yyyy-MM-dd HH:mm:ss} - [%thread] %-5level %logger{36} - %msg%n"
-    console: "%d{yyyy-MM-dd HH:mm:ss} - [%thread] %-5level %logger{36} - %msg%n"
-  logback:
-    rollingpolicy:
-      max-file-size: 10MB
-      max-history: 30
-      file-name-pattern: logs/smart-home-app.%d{yyyy-MM-dd}.%i.log

@@ -7,8 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.smarthome.smart_home.dto.DeviceDTO;
-import com.smarthome.smart_home.dto.DeviceStatusUpdateDTO;
+import com.smarthome.smart_home.dto.CreateDeviceDTO;
+import com.smarthome.smart_home.dto.DeviceUpdateDTO;
 import com.smarthome.smart_home.enums.DeviceStatus;
 import com.smarthome.smart_home.enums.DeviceType;
 import com.smarthome.smart_home.exception.ResourceNotFoundException;
@@ -81,27 +81,83 @@ public class DeviceService {
         return savedDevice;
     }
 
-    public Device createDevice(Device device, Long roomId) {
-        log.debug("Creating new device for room id: {}", roomId);
-        Room room = roomService.getRoomById(roomId);
+    public Device createDevice(CreateDeviceDTO createDeviceDTO) {
+        log.debug("Creating new device '{}' for room ID: {}",createDeviceDTO.getName(), createDeviceDTO.getRoomId());
+        Device device = new Device();
+        Room room = roomService.getRoomById(createDeviceDTO.getRoomId());
+        device.setName(createDeviceDTO.getName());
+        device.setType(createDeviceDTO.getType());
         device.setRoom(room);
-        device.setStatus(DeviceStatus.OFF);
+
+        if (createDeviceDTO.getType().hasValue()){
+            if (createDeviceDTO.getValue() != null) {
+                device.setValue(createDeviceDTO.getValue());
+            } else {
+                device.setValue(0.0);
+            }
+        }
+        else if (createDeviceDTO.getValue() != null) {
+            log.error("Device type {} does not support values, but a value was provided", createDeviceDTO.getType());
+            throw new ValidationException("Device type " + createDeviceDTO.getType() + " does not support values");
+        }
+
+        if (createDeviceDTO.getStatus() != null) {
+            device.setStatus(createDeviceDTO.getStatus());
+        } else {
+            device.setStatus(DeviceStatus.OFF);
+        }
+        
         Device savedDevice = deviceRepository.save(device);
-        log.info("Successfully created device with id: {} for room id: {}", savedDevice.getId(), roomId);
+        log.info("Successfully created device with ID: {} - {} in room: {}",
+                savedDevice.getId(), savedDevice.getName(), room.getName());
         return savedDevice;
     }
 
-    public Device updateDevice(Long id, Device deviceDetails, Long roomId) {
-        log.debug("Updating device with id: {}", id);
+    public Device updateFull(Long id, DeviceUpdateDTO deviceUpdateDTO) {
+        log.debug("Fully updating device with id: {}", id);
         Device existingDevice = getDeviceById(id);
-        Room room = roomService.getRoomById(roomId);
+        Room room = roomService.getRoomById(deviceUpdateDTO.getRoomId());
 
-        existingDevice.setName(deviceDetails.getName());
-        existingDevice.setType(deviceDetails.getType());
+        existingDevice.setName(deviceUpdateDTO.getName());
+        existingDevice.setStatus(deviceUpdateDTO.getStatus());
         existingDevice.setRoom(room);
-
+        if (existingDevice.getType().hasValue()){
+            if (deviceUpdateDTO.getValue() == null) {
+                log.error("Device type {} requires a value, but none was provided", existingDevice.getType());
+                throw new ValidationException("Device type " + existingDevice.getType() + " requires a value");
+            }
+            else{
+                existingDevice.setValue(deviceUpdateDTO.getValue());
+            }
+        }
         Device updatedDevice = deviceRepository.save(existingDevice);
-        log.info("Successfully updated device with id: {}", id);
+        log.info("Successfully fully updated device with id: {}", id);
+        return updatedDevice;
+    }
+
+    public Device updatePartially(Long id, DeviceUpdateDTO deviceUpdateDTO) {
+        log.debug("Partially updating device with id: {}", id);
+        Device existingDevice = getDeviceById(id);
+        if (deviceUpdateDTO.getName() != null) {
+            existingDevice.setName(deviceUpdateDTO.getName());
+        }
+        if (deviceUpdateDTO.getStatus() != null) {
+            existingDevice.setStatus(deviceUpdateDTO.getStatus());
+        }
+        if (deviceUpdateDTO.getRoomId() != null) {
+            Room room = roomService.getRoomById(deviceUpdateDTO.getRoomId());
+            existingDevice.setRoom(room);
+        }
+        if (deviceUpdateDTO.getValue() != null) {
+            if (existingDevice.getType().hasValue()){
+                existingDevice.setValue(deviceUpdateDTO.getValue());
+            } else {
+                log.error("Cannot set value for device type {} which does not support values", existingDevice.getType());
+                throw new ValidationException("Cannot set value for device type " + existingDevice.getType() + " which does not support values");
+            }
+        }
+        Device updatedDevice = deviceRepository.save(existingDevice);
+        log.info("Successfully partially updated device with id: {}", id);
         return updatedDevice;
     }
 
@@ -113,24 +169,6 @@ public class DeviceService {
         }
         deviceRepository.deleteById(id);
         log.info("Successfully deleted device with id: {}", id);
-    }
-
-    public DeviceDTO updateDeviceStatus(Long id, DeviceStatusUpdateDTO updateDTO) {
-        log.debug("Updating device status for id: {} with status: {}", id,
-                updateDTO != null ? updateDTO.getStatus() : "null");
-
-        if (updateDTO == null || updateDTO.getStatus() == null) {
-            log.error("Invalid status update request for device id: {}. Status is required", id);
-            throw new ValidationException("Status is required");
-        }
-
-        Device device = getDeviceById(id);
-        device.setStatus(updateDTO.getStatus());
-        deviceRepository.save(device);
-
-        DeviceDTO deviceDTO = deviceMapper.toDTO(device);
-        log.info("Successfully updated device status for id: {} to {}", id, updateDTO.getStatus());
-        return deviceDTO;
     }
 
     public Device setValue(Device device, Double value) {

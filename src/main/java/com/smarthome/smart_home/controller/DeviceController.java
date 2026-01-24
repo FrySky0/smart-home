@@ -1,41 +1,35 @@
 package com.smarthome.smart_home.controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.smarthome.smart_home.dto.CreateDeviceDTO;
 import com.smarthome.smart_home.dto.DeviceDTO;
-import com.smarthome.smart_home.dto.DeviceStatusUpdateDTO;
-import com.smarthome.smart_home.model.Device;
+import com.smarthome.smart_home.dto.DeviceUpdateDTO;
 import com.smarthome.smart_home.enums.DeviceStatus;
 import com.smarthome.smart_home.enums.DeviceType;
 import com.smarthome.smart_home.mappers.DeviceMapper;
+import com.smarthome.smart_home.model.Device;
 import com.smarthome.smart_home.service.DeviceService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/devices")
@@ -95,52 +89,35 @@ public class DeviceController {
         log.info("Creating new device with name: {}, type: {}, roomId: {}",
                 createDeviceDTO.getName(), createDeviceDTO.getType(), createDeviceDTO.getRoomId());
 
-        Device device = deviceMapper.toEntity(createDeviceDTO);
-        Device savedDevice = deviceService.createDevice(device, createDeviceDTO.getRoomId());
-        DeviceDTO savedDeviceDTO = deviceMapper.toDTO(savedDevice);
+        Device device = deviceService.createDevice(createDeviceDTO);
+        DeviceDTO deviceDTO = deviceMapper.toDTO(device);
 
-        log.info("Successfully created device with ID: {}", savedDevice.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedDeviceDTO);
+        log.info("Successfully created device with ID: {}", device.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(deviceDTO);
     }
 
-    @PutMapping("/{id}/setValue")
-    public Device putMethodName(@PathVariable @NotNull Long id, @RequestBody Double value) {
-        log.info("Setting value for device ID: {} to value: {}", id, value);
-
-        Device device = deviceService.setValue(deviceService.getDeviceById(id), value);
-
-        log.info("Successfully set value for device ID: {} to value: {}", id, value);
-        return device;
-    }
-
-    // Обновить устройство
     @PutMapping("/{id}")
-    public ResponseEntity<DeviceDTO> updateDevice(@PathVariable @NotNull Long id,
-            @Valid @RequestBody CreateDeviceDTO createDeviceDTO) {
-        log.info("Updating device with ID: {}, new name: {}, type: {}, roomId: {}",
-                id, createDeviceDTO.getName(), createDeviceDTO.getType(), createDeviceDTO.getRoomId());
+    public ResponseEntity<DeviceDTO> updateDeviceFull(@PathVariable @NotNull Long id, @Valid @RequestBody DeviceUpdateDTO deviceUpdateDTO) {
+        log.info("Fully updating device with ID: {}", id);
 
-        Device device = deviceMapper.toEntity(createDeviceDTO);
-        Device updatedDevice = deviceService.updateDevice(id, device, createDeviceDTO.getRoomId());
-        DeviceDTO updatedDeviceDTO = deviceMapper.toDTO(updatedDevice);
-
-        log.info("Successfully updated device with ID: {}", id);
-        return ResponseEntity.ok(updatedDeviceDTO);
+        Device device = deviceService.updateFull(id, deviceUpdateDTO);
+        DeviceDTO deviceDTO = deviceMapper.toDTO(device);
+        log.info("The device with ID {} has been successfully fully updated", id);
+        return ResponseEntity.ok(deviceDTO);
     }
 
-    // Обновить только статус устройства
     @PatchMapping("/{id}")
-    public ResponseEntity<DeviceDTO> patchDeviceStatus(@PathVariable @NotNull Long id,
-            @Valid @RequestBody DeviceStatusUpdateDTO updateDTO) {
-        log.info("Updating status for device ID: {} to status: {}", id, updateDTO.getStatus());
+    public ResponseEntity<DeviceDTO> updateDevicePartially(@PathVariable @NotNull Long id,
+            @Valid @RequestBody @NotNull DeviceUpdateDTO deviceUpdateDTO) {
+        log.info("Partially updating device with ID: {}", id);
 
-        DeviceDTO updatedDevice = deviceService.updateDeviceStatus(id, updateDTO);
+        Device updatedDevice = deviceService.updatePartially(id, deviceUpdateDTO);
+        DeviceDTO deviceDTO = deviceMapper.toDTO(updatedDevice);
 
-        log.info("Successfully updated status for device ID: {} to status: {}", id, updateDTO.getStatus());
-        return ResponseEntity.ok(updatedDevice);
+        log.info("The device with ID {} has been successfully partially updated", id);
+        return ResponseEntity.ok(deviceDTO);
     }
 
-    // Удалить устройство
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDevice(@PathVariable @NotNull Long id) {
         log.info("Deleting device with ID: {}", id);

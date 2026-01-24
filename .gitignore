@@ -38,3 +38,4 @@ build/
 .gitignore
 all_files_content.txt
 merge.py
+logs/
