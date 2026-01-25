@@ -1,14 +1,16 @@
 package com.smarthome.smart_home.service;
 
-import com.smarthome.smart_home.enums.Role;
-import com.smarthome.smart_home.model.User;
-import com.smarthome.smart_home.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Collections;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import com.smarthome.smart_home.enums.Role;
+import com.smarthome.smart_home.model.User;
+import com.smarthome.smart_home.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -16,7 +18,6 @@ import java.util.Collections;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
     public User registerUser(String username, String email, String password) {
         if (userRepository.existsByUsername(username)) {
             throw new RuntimeException("Username already exists");

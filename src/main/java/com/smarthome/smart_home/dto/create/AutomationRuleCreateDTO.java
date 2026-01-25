@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.smarthome.smart_home.dto.AutomationRuleValidatable;
 import com.smarthome.smart_home.enums.automation.Action;
 import com.smarthome.smart_home.enums.automation.TriggerEvent;
@@ -35,6 +36,7 @@ public class AutomationRuleCreateDTO implements AutomationRuleValidatable {
     @Schema(description = "Значение сенсора-триггера для правила автоматизации", example = "25.5")
     private Double triggerValue;
     @DateTimeFormat(iso = DateTimeFormat.ISO.TIME)
+    @JsonFormat(pattern = "H:mm:ss")
     @Schema(description = "Время-триггер для правила автоматизации", example = "14:30:00")
     private LocalTime triggerTime;
     @Schema(description = "Действие, которое будет выполнено правилом автоматизации", example = "TURN_ON")

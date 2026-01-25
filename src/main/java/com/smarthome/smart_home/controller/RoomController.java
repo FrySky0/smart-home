@@ -24,6 +24,7 @@ import com.smarthome.smart_home.dto.update.put.RoomPutDTO;
 import com.smarthome.smart_home.mappers.RoomMapper;
 import com.smarthome.smart_home.model.Room;
 import com.smarthome.smart_home.service.RoomService;
+import com.smarthome.smart_home.service.TelegramService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,10 +39,12 @@ import lombok.extern.slf4j.Slf4j;
 public class RoomController {
     private final RoomService roomService;
     private final RoomMapper roomMapper;
+    private final TelegramService telegramService;
 
-    public RoomController(RoomService roomService, RoomMapper roomMapper) {
+    public RoomController(RoomService roomService, RoomMapper roomMapper, TelegramService telegramService) {
         this.roomService = roomService;
         this.roomMapper = roomMapper;
+        this.telegramService = telegramService;
     }
 
     @Operation(summary = "Получить все комнаты с возможностью фильтрации", description = "Получить список всех комнат с возможностью фильтрации по этажу и названию комнаты.")
@@ -91,6 +94,7 @@ public class RoomController {
         Room savedRoom = roomService.createRoom(room);
 
         log.info("Room created successfully with ID: {}", savedRoom.getId());
+        telegramService.sendLog("New room created: " + savedRoom.getName() + " (ID: " + savedRoom.getId() + ")");
         return ResponseEntity.ok(roomMapper.toDTO(savedRoom));
     }
 
@@ -105,6 +109,7 @@ public class RoomController {
         Room updatedRoom = roomService.updateFull(id, roomPutDTO);
 
         log.info("Room updated successfully with ID: {}", id);
+        telegramService.sendLog("Room " + updatedRoom.getName() + " (ID: " + updatedRoom.getId() + ") fully updated");
         return ResponseEntity.ok(roomMapper.toDTO(updatedRoom));
     }
 
@@ -118,6 +123,7 @@ public class RoomController {
         Room updatedRoom = roomService.updatePartially(id, roomPatchDTO);
 
         log.info("Room updated successfully with ID: {}", id);
+        telegramService.sendLog("Room " + updatedRoom.getName() + " (ID: " + updatedRoom.getId() + ") partially updated");
         return ResponseEntity.ok(roomMapper.toDTO(updatedRoom));
     }
     // Удалить комнату
@@ -130,6 +136,7 @@ public class RoomController {
         roomService.deleteRoom(id);
 
         log.info("Room deleted successfully with ID: {}", id);
+        telegramService.sendLog("Room with ID " + id + " has been deleted");
         return ResponseEntity.noContent().build();
     }
 }

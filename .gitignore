@@ -39,3 +39,4 @@ build/
 all_files_content.txt
 merge.py
 logs/
+.env

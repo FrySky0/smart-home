@@ -16,6 +16,7 @@ import com.smarthome.smart_home.dto.auth.AuthRequestDTO;
 import com.smarthome.smart_home.dto.auth.AuthResponseDTO;
 import com.smarthome.smart_home.model.User;
 import com.smarthome.smart_home.service.JwtService;
+import com.smarthome.smart_home.service.TelegramService;
 import com.smarthome.smart_home.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,6 +36,7 @@ public class AuthController {
 
     private final UserService userService;
     private final JwtService jwtService;
+    private final TelegramService telegramService;
 
     @Value("${jwt.cookie-name}")
     private String cookieName;
@@ -58,6 +60,7 @@ public class AuthController {
         setAuthCookie(response, token);
 
         log.info("User registered successfully: {}", user.getUsername());
+        telegramService.sendLog("New user registered: " + user.getUsername());
         return ResponseEntity.ok(new AuthResponseDTO(user.getUsername(), user.getEmail(), "Registration successful"));
     }
     @Operation(summary = "Вход пользователя", description = "Аутентификация пользователя с указанием имени и пароля.")
@@ -77,6 +80,7 @@ public class AuthController {
         setAuthCookie(response, token);
 
         log.info("User logged in successfully: {}", user.getUsername());
+        telegramService.sendLog("User logged in: " + user.getUsername());
         return ResponseEntity.ok(new AuthResponseDTO(user.getUsername(), user.getEmail(), "Login successful"));
     }
     @Operation(summary = "Выход пользователя", description = "Выход пользователя и удаление аутентификационного cookie.")

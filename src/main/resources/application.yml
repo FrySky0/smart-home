@@ -4,10 +4,18 @@ spring:
     version: "0.2"
   profiles:
     active: dev
+  config:
+    import: "optional:file:.env[.properties]"
 jwt:
-  secret: w9DR5HWM0XpycWjt4JoRYaLRKQhfS6g5pg73KDFPL2vwk2UsXZ9ap48ZQwjbgmXvxxlqnVz6XGkk7Ul9LkUHYA==
+  secret: ${JWT_SECRET}
   expiration: 86400000
   cookie-name: auth-token
+
+telegram:
+  bot:
+    token: ${TELEGRAM_BOT_TOKEN}
+    username: SmartHomeBot
+    chat-id: ${TELEGRAM_CHAT_ID}
 
 logging:
   level:
@@ -30,9 +38,9 @@ spring:
     activate:
       on-profile: dev
   datasource:
-    url: jdbc:postgresql://localhost:5432/smart_home_db
-    username: postgres
-    password: 123
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -56,9 +64,9 @@ spring:
     activate:
       on-profile: prod
   datasource:
-    url: jdbc:postgresql://localhost:5432/smart_home_db
-    username: 
-    password: your-prod-password
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

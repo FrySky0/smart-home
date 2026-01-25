@@ -27,6 +27,7 @@ import com.smarthome.smart_home.enums.DeviceType;
 import com.smarthome.smart_home.mappers.DeviceMapper;
 import com.smarthome.smart_home.model.Device;
 import com.smarthome.smart_home.service.DeviceService;
+import com.smarthome.smart_home.service.TelegramService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -42,10 +43,12 @@ import lombok.extern.slf4j.Slf4j;
 public class DeviceController {
     private final DeviceService deviceService;
     private final DeviceMapper deviceMapper;
+    private final TelegramService telegramService;
 
-    public DeviceController(DeviceService deviceService, DeviceMapper deviceMapper) {
+    public DeviceController(DeviceService deviceService, DeviceMapper deviceMapper, TelegramService telegramService) {
         this.deviceService = deviceService;
         this.deviceMapper = deviceMapper;
+        this.telegramService = telegramService;
     }
 
     // Получить все устройства, с возможностью фильтрации по комнате, типу и статусу
@@ -100,6 +103,7 @@ public class DeviceController {
         DeviceResponseDTO deviceDTO = deviceMapper.toResponseDTO(device);
 
         log.info("Successfully created device with ID: {}", device.getId());
+        telegramService.sendLog("New device created: " + device.getName() + " (ID: " + device.getId() + ")");
         return ResponseEntity.status(HttpStatus.CREATED).body(deviceDTO);
     }
 
@@ -112,6 +116,7 @@ public class DeviceController {
         Device device = deviceService.updateFull(id, devicePutDTO);
         DeviceResponseDTO deviceDTO = deviceMapper.toResponseDTO(device);
         log.info("The device with ID {} has been successfully fully updated", id);
+        telegramService.sendLog("Device " + device.getName() + " (ID: " + device.getId() + ") fully updated");
         return ResponseEntity.ok(deviceDTO);
     }
 
@@ -126,6 +131,7 @@ public class DeviceController {
         DeviceResponseDTO deviceDTO = deviceMapper.toResponseDTO(updatedDevice);
 
         log.info("The device with ID {} has been successfully partially updated", id);
+        telegramService.sendLog("Device " + updatedDevice.getName() + " (ID: " + updatedDevice.getId() + ") partially updated");
         return ResponseEntity.ok(deviceDTO);
     }
 
@@ -138,6 +144,7 @@ public class DeviceController {
         deviceService.deleteDevice(id);
 
         log.info("Successfully deleted device with ID: {}", id);
+        telegramService.sendLog("Device with ID " + id + " has been deleted");
         return ResponseEntity.noContent().build();
     }
 }

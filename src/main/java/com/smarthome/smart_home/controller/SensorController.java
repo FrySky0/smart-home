@@ -26,6 +26,7 @@ import com.smarthome.smart_home.enums.SensorType;
 import com.smarthome.smart_home.mappers.SensorMapper;
 import com.smarthome.smart_home.model.Sensor;
 import com.smarthome.smart_home.service.SensorService;
+import com.smarthome.smart_home.service.TelegramService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,10 +42,12 @@ import lombok.extern.slf4j.Slf4j;
 public class SensorController {
     private final SensorService sensorService;
     private final SensorMapper sensorMapper;
+    private final TelegramService telegramService;
 
-    public SensorController(SensorService sensorService, SensorMapper sensorMapper) {
+    public SensorController(SensorService sensorService, SensorMapper sensorMapper, TelegramService telegramService) {
         this.sensorService = sensorService;
         this.sensorMapper = sensorMapper;
+        this.telegramService = telegramService;
     }
 
     // Получить все сенсоры, с возможностью фильтрации по комнате и типу
@@ -100,6 +103,7 @@ public class SensorController {
         SensorResponseDTO sensorDTO = sensorMapper.toDTO(sensor);
 
         log.info("Successfully created sensor with ID: {} and UUID: {}", sensor.getId(), sensor.getUuid());
+        telegramService.sendLog("New sensor created: " + sensor.getName() + " (ID: " + sensor.getId() + ")");
         return ResponseEntity.status(HttpStatus.CREATED).body(sensorDTO);
     }
 
@@ -114,6 +118,7 @@ public class SensorController {
         SensorResponseDTO sensorDTO = sensorMapper.toDTO(sensor);
 
         log.info("The sensor with ID {} has been successfully fully updated", id);
+        telegramService.sendLog("Sensor " + sensor.getName() + " (ID: " + sensor.getId() + ") fully updated");
         return ResponseEntity.ok(sensorDTO);
     }
     @Operation(summary = "Частично обновить сенсор", description = "Обновить определённые поля существующего сенсора по его ID.")
@@ -127,6 +132,7 @@ public class SensorController {
         SensorResponseDTO updatedSensorDTO = sensorMapper.toDTO(updatedSensor);
 
         log.info("The sensor with ID {} has been successfully partially updated", id);
+        telegramService.sendLog("Sensor " + updatedSensor.getName() + " (ID: " + updatedSensor.getId() + ") partially updated");
         return ResponseEntity.ok(updatedSensorDTO);
     }
 
@@ -140,6 +146,7 @@ public class SensorController {
         sensorService.deleteSensor(id);
 
         log.info("Successfully deleted sensor with ID: {}", id);
+        telegramService.sendLog("Sensor with ID " + id + " has been deleted");
         return ResponseEntity.noContent().build();
     }
 }

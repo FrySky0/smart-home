@@ -1,4 +1,4 @@
-package com.smarthome.smart_home.service.automation;
+package com.smarthome.smart_home.service;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -25,8 +25,6 @@ import com.smarthome.smart_home.model.Device;
 import com.smarthome.smart_home.model.Sensor;
 import com.smarthome.smart_home.repository.AutomationRepository;
 import com.smarthome.smart_home.repository.SensorRepository;
-import com.smarthome.smart_home.service.DeviceService;
-import com.smarthome.smart_home.service.SensorService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +40,7 @@ public class AutomationService {
     private final AutomationRepository automationRepository;
     private final SensorRepository sensorRepository;
     private final AutomationRuleMapper automationRuleMapper;
+    private final TelegramService telegramService;
 
     public List<AutomationRule> getAllRules() {
         log.debug("Fetching all automation rules");
@@ -314,15 +313,18 @@ public class AutomationService {
             case TURN_ON:
                 log.info("Turning on device ID: {} for rule '{}'", rule.getDevice().getId(), rule.getName());
                 deviceService.turnOn(rule.getDevice());
+                telegramService.sendLog("Device " + rule.getDevice().getName() + " turned ON by rule '" + rule.getName() + "'");
                 break;
             case TURN_OFF:
                 log.info("Turning off device ID: {} for rule '{}'", rule.getDevice().getId(), rule.getName());
                 deviceService.turnOff(rule.getDevice());
+                telegramService.sendLog("Device " + rule.getDevice().getName() + " turned OFF by rule '" + rule.getName() + "'");
                 break;
             case SET_VALUE:
                 log.info("Setting value to {} for device ID: {} for rule '{}'",
                         rule.getActionValue(), rule.getDevice().getId(), rule.getName());
                 deviceService.setValue(rule.getDevice(), rule.getActionValue());
+                telegramService.sendLog("Device " + rule.getDevice().getName() + " set to " + rule.getActionValue() + " by rule '" + rule.getName() + "'");
                 break;
             default:
                 log.warn("Unknown action type: {} for rule ID: {}", rule.getAction(), rule.getId());
