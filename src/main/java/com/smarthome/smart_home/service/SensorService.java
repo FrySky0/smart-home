@@ -113,11 +113,15 @@ public class SensorService {
         log.info("Successfully deleted sensor with ID: {}", id);
     }
 
-    public Page<Sensor> getSensorsByFilters(Long roomId, SensorType type, Pageable pageable) {
-        log.debug("Filtering sensors with pagination - Room ID: {}, Type: {}, Pageable: {}",
-                roomId, type, pageable);
-        Page<Sensor> sensorPage = sensorRepository.findByFilters(roomId, type, pageable);
-        log.info("Found {} sensors on page {} with filters - Room ID: {}, Type: {}",
+    public Page<Sensor> getSensorsByFilters(String name, Long roomId, SensorType type, Pageable pageable) {
+        log.debug("Filtering sensors with pagination - Name: {}, Room ID: {}, Type: {}, Pageable: {}",
+                name, roomId, type, pageable);
+        String searchName = null;
+        if (name != null && !name.isBlank()) {
+            searchName = "%" + name.toLowerCase() + "%";
+        }
+        Page<Sensor> sensorPage = sensorRepository.findByFilters(searchName, roomId, type, pageable);
+        log.info("Found {} sensors on page {} with filters - Name: {}, Room ID: {}, Type: {}",
                 sensorPage.getNumberOfElements(), sensorPage.getNumber(), roomId, type);
         return sensorPage;
     }

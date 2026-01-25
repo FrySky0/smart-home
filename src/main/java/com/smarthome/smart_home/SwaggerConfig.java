@@ -10,10 +10,21 @@ import io.swagger.v3.oas.models.info.Info;
 public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
+        
         return new OpenAPI()
                 .info(new Info()
                         .title("Smart Home API")
                         .version("1.0")
-                        .description("API documentation for the Smart Home application"));
+                        .description("<h3>🏠 Smart Home Management System</h3>" +
+                                "<p>REST API для управления умным домом с поддержкой:</p>" +
+                                "<ul>" +
+                                "<li><b>Управление устройствами</b> (освещение, термостаты, кондиционеры, ТВ)</li>" +
+                                "<li><b>Мониторинг сенсоров</b> (температура, движение, освещенность, влажность)</li>" +
+                                "<li><b>Автоматизация</b> (правила с триггерами по времени/значениям сенсоров)</li>" +
+                                "<li><b>Управление комнатами</b> и этажами</li>" +
+                                "<li><b>Импорт/экспорт</b> конфигурации в JSON</li>" +
+                                "<li><b>Аутентификация</b> JWT с ролями пользователь/администратор</li>" +
+                                "</ul>" +
+                                "<p>Технологии: Spring Boot 3, PostgreSQL, JWT, Swagger/OpenAPI</p>"));
     }
 }

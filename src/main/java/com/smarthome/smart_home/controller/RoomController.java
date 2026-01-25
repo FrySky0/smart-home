@@ -25,6 +25,7 @@ import com.smarthome.smart_home.mappers.RoomMapper;
 import com.smarthome.smart_home.model.Room;
 import com.smarthome.smart_home.service.RoomService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -43,6 +44,7 @@ public class RoomController {
         this.roomMapper = roomMapper;
     }
 
+    @Operation(summary = "Получить все комнаты с возможностью фильтрации", description = "Получить список всех комнат с возможностью фильтрации по этажу и названию комнаты.")
     @GetMapping()
     public ResponseEntity<Page<RoomResponseDTO>> getAllRooms(
             @RequestParam(required = false) Integer floor,
@@ -68,6 +70,7 @@ public class RoomController {
     }
 
     // Получить комнату по ID
+    @Operation(summary = "Получить комнату по ID", description = "Получить информацию о комнате по её уникальному идентификатору.")
     @GetMapping("/{id}")
     public ResponseEntity<RoomResponseDTO> getRoomById(@PathVariable @NotNull Long id) {
         log.info("Getting room by ID: {}", id);
@@ -78,6 +81,7 @@ public class RoomController {
     }
 
     // Создать новую комнату
+    @Operation(summary = "Создать новую комнату", description = "Создать новую комнату с указанными параметрами.")
     @PostMapping()
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RoomResponseDTO> createRoom(@Valid @RequestBody RoomCreateDTO createRoomDTO) {
@@ -91,6 +95,7 @@ public class RoomController {
     }
 
     // Обновить комнату
+    @Operation(summary = "Полностью обновить комнату", description = "Полностью обновить информацию о комнате.")
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RoomResponseDTO> updateRoomFull(@PathVariable @NotNull Long id,
@@ -103,6 +108,7 @@ public class RoomController {
         return ResponseEntity.ok(roomMapper.toDTO(updatedRoom));
     }
 
+    @Operation(summary = "Частично обновить комнату", description = "Частично обновить информацию о комнате.")
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RoomResponseDTO> updateRoomPartially(@PathVariable @NotNull Long id,
@@ -115,6 +121,7 @@ public class RoomController {
         return ResponseEntity.ok(roomMapper.toDTO(updatedRoom));
     }
     // Удалить комнату
+    @Operation(summary = "Удалить комнату", description = "Удалить комнату по её уникальному идентификатору.")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteRoom(@PathVariable @NotNull Long id) {

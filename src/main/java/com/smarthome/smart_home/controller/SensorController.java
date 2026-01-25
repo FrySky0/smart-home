@@ -51,6 +51,7 @@ public class SensorController {
     @Operation(summary = "Получить все сенсоры с возможностью фильтрации", description = "Получить список всех сенсоров с возможностью фильтрации по комнате и типу сенсора.")
     @GetMapping
     public ResponseEntity<Page<SensorResponseDTO>> getAllSensors(
+            @Parameter(description="Поиск по названию (частичное совпадение)") @RequestParam(required = false) String name,
             @Parameter(description="Поиск по ID комнаты, в которой стоит этот сенсор") @RequestParam(required = false) Long roomId,
             @Parameter(description="Поиск по типу сенсора") @RequestParam(required = false) SensorType type,
             @RequestParam(defaultValue = "0") int page,
@@ -59,15 +60,15 @@ public class SensorController {
             @RequestParam(defaultValue = "asc") String sortDirection) {
 
         log.info(
-                "Getting all sensors with filters - roomId: {}, type: {}, page: {}, size: {}, sortBy: {}, sortDirection: {}",
-                roomId, type, page, size, sortBy, sortDirection);
+                "Getting all sensors with filters - name: {}, roomId: {}, type: {}, page: {}, size: {}, sortBy: {}, sortDirection: {}",
+                name, roomId, type, page, size, sortBy, sortDirection);
 
         Sort sort = sortDirection.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<SensorResponseDTO> sensorPage = sensorService.getSensorsByFilters(roomId, type, pageable)
+        Page<SensorResponseDTO> sensorPage = sensorService.getSensorsByFilters(name, roomId, type, pageable)
                 .map(sensorMapper::toDTO);
 
         log.info("Successfully retrieved {} sensors on page {} of {}",

@@ -24,12 +24,14 @@ public interface SensorRepository extends JpaRepository<Sensor, Long> {
     List<Sensor> findByTypeAndValueGreaterThan(SensorType type, Double value);
 
     @Query("SELECT s FROM Sensor s WHERE " +
-            "(:roomId IS NULL OR s.room.id = :roomId) AND " +
-            "(:type IS NULL OR s.type = :type)")
+        "(:name IS NULL OR LOWER(s.name) LIKE :name) AND " +
+        "(:roomId IS NULL OR s.room.id = :roomId) AND " +
+        "(:type IS NULL OR s.type = :type)")
     Page<Sensor> findByFilters(
-            @Param("roomId") Long roomId,
-            @Param("type") SensorType type,
-            Pageable pageable);
+        @Param("name") String name,
+        @Param("roomId") Long roomId,
+        @Param("type") SensorType type,
+        Pageable pageable);
 
     @Query("SELECT s FROM Sensor s WHERE s.room.floor = :floor")
     List<Sensor> findByFloor(@Param("floor") Integer floor);

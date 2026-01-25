@@ -15,7 +15,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-@Schema(description = "Модель для создания/обновления правила автоматизации")
+@Schema(description = "Модель для создания правила автоматизации")
 public class AutomationRuleCreateDTO implements AutomationRuleValidatable {
     @Schema(description = "Название правила автоматизации", example = "Включить свет при движении")
     @NotBlank(message = "Automation rule name is required")

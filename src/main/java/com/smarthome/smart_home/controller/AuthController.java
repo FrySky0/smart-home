@@ -18,6 +18,8 @@ import com.smarthome.smart_home.model.User;
 import com.smarthome.smart_home.service.JwtService;
 import com.smarthome.smart_home.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -27,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/api/auth")
 @Slf4j
+@Tag(name = "Authentication", description = "Аутентификация и регистрация пользователей")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -39,6 +42,7 @@ public class AuthController {
     @Value("${jwt.expiration}")
     private Long expiration;
 
+    @Operation(summary = "Регистрация нового пользователя", description = "Регистрация нового пользователя с указанием имени, email и пароля.")
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody AuthRequestDTO authRequest, 
                                                    HttpServletResponse response) {
@@ -56,7 +60,7 @@ public class AuthController {
         log.info("User registered successfully: {}", user.getUsername());
         return ResponseEntity.ok(new AuthResponseDTO(user.getUsername(), user.getEmail(), "Registration successful"));
     }
-
+    @Operation(summary = "Вход пользователя", description = "Аутентификация пользователя с указанием имени и пароля.")
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody AuthRequestDTO authRequest, 
                                                 HttpServletResponse response) {
@@ -75,7 +79,7 @@ public class AuthController {
         log.info("User logged in successfully: {}", user.getUsername());
         return ResponseEntity.ok(new AuthResponseDTO(user.getUsername(), user.getEmail(), "Login successful"));
     }
-
+    @Operation(summary = "Выход пользователя", description = "Выход пользователя и удаление аутентификационного cookie.")
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout(HttpServletResponse response) {
         Cookie cookie = new Cookie(cookieName, null);
@@ -89,6 +93,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Logout successful"));
     }
 
+    @Operation(summary = "Получить информацию о текущем пользователе", description = "Возвращает информацию о текущем аутентифицированном пользователе.")
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal User user) {
         if (user == null) {

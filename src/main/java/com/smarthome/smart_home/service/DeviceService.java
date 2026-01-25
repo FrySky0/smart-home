@@ -31,10 +31,14 @@ public class DeviceService {
     private final DeviceMapper deviceMapper;
     private final RoomService roomService;
 
-    public Page<Device> getDevicesByFilters(Long roomId, DeviceType type, DeviceStatus status, Pageable pageable) {
-        log.debug("Fetching devices with filters - roomId: {}, type: {}, status: {}, pageable: {}",
-                roomId, type, status, pageable);
-        Page<Device> devices = deviceRepository.findByFilters(roomId, type, status, pageable);
+    public Page<Device> getDevicesByFilters(String name,Long roomId, DeviceType type, DeviceStatus status, Pageable pageable) {
+        log.debug("Fetching devices with filters - name: {}, roomId: {}, type: {}, status: {}, pageable: {}",
+                name, roomId, type, status, pageable);
+        String searchName = null;
+        if (name != null && !name.isBlank()) {
+            searchName = "%" + name.toLowerCase() + "%";
+        }
+        Page<Device> devices = deviceRepository.findByFilters(searchName, roomId, type, status, pageable);
         log.info("Successfully fetched {} devices with applied filters", devices.getTotalElements());
         return devices;
     }

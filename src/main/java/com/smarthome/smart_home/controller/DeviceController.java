@@ -49,9 +49,10 @@ public class DeviceController {
     }
 
     // Получить все устройства, с возможностью фильтрации по комнате, типу и статусу
-    @Operation(summary = "Получить все устройства с возможностью фильтрации", description = "Получить список всех устройств с возможностью фильтрации по комнате, типу и статусу устройства.")
+    @Operation(summary = "Получить все устройства с возможностью фильтрации", description = "Получить список всех устройств с возможностью фильтрации по имени, комнате, типу и статусу устройства.")
     @GetMapping
     public ResponseEntity<Page<DeviceResponseDTO>> getAllDevices(
+            @Parameter(description="Поиск по названию (частичное совпадение)") @RequestParam(required = false) String name,
             @Parameter(description="Поиск по ID комнаты, в которой стоит этот девайс") @RequestParam(required = false) Long roomId,
             @Parameter(description="Поиск по типу девайса") @RequestParam(required = false) DeviceType type,
             @Parameter(description="Поиск по статусу") @RequestParam(required = false) DeviceStatus status,
@@ -61,15 +62,15 @@ public class DeviceController {
             @RequestParam(defaultValue = "asc") String sortDirection) {
 
         log.info(
-                "Getting all devices with filters - roomId: {}, type: {}, status: {}, page: {}, size: {}, sortBy: {}, sortDirection: {}",
-                roomId, type, status, page, size, sortBy, sortDirection);
+                "Getting all devices with filters - name: {}, roomId: {}, type: {}, status: {}, page: {}, size: {}, sortBy: {}, sortDirection: {}",
+                name, roomId, type, status, page, size, sortBy, sortDirection);
 
         Sort sort = sortDirection.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<DeviceResponseDTO> devicePage = deviceService.getDevicesByFilters(roomId, type, status, pageable)
+        Page<DeviceResponseDTO> devicePage = deviceService.getDevicesByFilters(name,roomId, type, status, pageable)
                 .map(deviceMapper::toResponseDTO);
 
         log.info("Successfully retrieved {} devices on page {}", devicePage.getNumberOfElements(), page);
