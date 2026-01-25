@@ -1,11 +1,14 @@
 package com.smarthome.smart_home.service.automation;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.smarthome.smart_home.dto.automation.AutomationRuleDTO;
@@ -22,6 +25,7 @@ import com.smarthome.smart_home.repository.SensorRepository;
 import com.smarthome.smart_home.service.DeviceService;
 import com.smarthome.smart_home.service.SensorService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,20 +48,31 @@ public class AutomationService {
     }
 
     public Page<AutomationRule> getRulesByFilters(
+            String name,
+            String description,
             Boolean enabled,
             TriggerEvent triggerEvent,
+            LocalTime triggerTime,
             Double triggerValue,
-            Long triggerDeviceId,
-            Long triggerSensorId,
+            UUID triggerDeviceUuid,
+            UUID triggerSensorUuid,
             Action action,
             Double actionValue,
             Pageable pageable) {
         log.debug(
-                "Fetching paginated automation rules with filters - enabled: {}, triggerEvent: {}, triggerValue: {}, triggerDeviceId: {}, triggerSensorId: {}, action: {}, actionValue: {}, pageable: {}",
-                enabled, triggerEvent, triggerValue, triggerDeviceId, triggerSensorId, action, actionValue, pageable);
-
-        Page<AutomationRule> rules = automationRepository.findByFilters(enabled, triggerEvent, triggerValue,
-                triggerDeviceId, triggerSensorId,
+                "Fetching paginated automation rules with filters - name: {}, descriptiong: {}, enabled: {}, triggerEvent: {}, triggerValue: {}, triggerDeviceUuid: {}, triggerSensorUuid: {}, action: {}, actionValue: {}, pageable: {}",
+                name,description,enabled, triggerEvent, triggerValue, triggerDeviceUuid, triggerSensorUuid, action, actionValue, pageable);
+        String searchName = null;
+        if (name != null && !name.isBlank()) {
+            searchName = "%" + name.toLowerCase() + "%";
+        }
+        String searchDescription = null;
+        if (description != null && !description.isBlank()) {
+            searchDescription = "%" + description.toLowerCase() + "%";
+        }
+        log.warn("searchName: {}, searchDescription: {}", searchName, searchDescription);
+        Page<AutomationRule> rules = automationRepository.findByFilters(searchName,searchDescription,enabled, triggerEvent, triggerValue,
+                triggerTime, triggerDeviceUuid, triggerSensorUuid,
                 action, actionValue, pageable);
 
         log.info("Retrieved {} automation rules (page {}/{} with {} total elements) matching the specified filters",
@@ -85,7 +100,7 @@ public class AutomationService {
         log.debug("Found {} enabled rules to process", rules.size());
 
         for (AutomationRule rule : rules) {
-            if (checkCondition(rule, rule.getTriggerSensor())) {
+            if (checkCondition(rule, rule.getSensor())) {
                 log.debug("Rule '{}' condition met, executing action", rule.getName());
                 goAction(rule);
                 actionedRules.add(rule);
@@ -101,19 +116,53 @@ public class AutomationService {
     public AutomationRuleResponseDTO createRule(AutomationRuleDTO dto) {
         log.info("Creating new automation rule with name: {}", dto.getName());
 
-        Device device = deviceService.getDeviceByUuid(dto.getTriggerDeviceUuid());
-        if (!device.getType().hasValue() && dto.getAction() == Action.SET_VALUE) {
-            log.error("Cannot create rule - device with type {} does not support SET_VALUE action", device.getType());
-            throw new RuntimeException("Device with type " + device.getType() + " does not have a value");
+        Device device = deviceService.getDeviceByUuid(dto.getDeviceUuid());
+
+        validateRuleLogic(dto,device);
+        
+        Sensor sensor = null;
+        if (dto.getSensorUuid() != null){
+            sensor = sensorService.getSensorByUuid(dto.getSensorUuid());
         }
 
-        log.debug("Device type validation passed for device: {}", device.getType());
-        Sensor sensor = sensorService.getSensorByUuid(dto.getTriggerSensorUuid());
         AutomationRule rule = automationRuleMapper.toEntity(dto, device, sensor);
         automationRepository.save(rule);
 
         log.info("Successfully created automation rule with ID: {} and name: {}", rule.getId(), rule.getName());
         return automationRuleMapper.toResponseDTO(rule);
+    }
+
+    private void validateRuleLogic(AutomationRuleDTO dto, Device device){
+        if (dto.getTriggerEvent() == null){
+            log.error("Cannot create rule - Trigger event must be specified");
+            throw new RuntimeException("Trigger event must be specified");
+        }
+        if (dto.getTriggerEvent() == TriggerEvent.TIME){
+            if (dto.getTriggerTime() == null){
+                log.error("Cannot create rule - TIME trigger event requires a trigger time");
+                throw new RuntimeException("TIME trigger event requires a trigger time");
+            }
+        }
+        else {
+            if (dto.getSensorUuid() == null){
+                log.error("Cannot create rule - Non-TIME trigger event requires a sensor UUID");
+                throw new RuntimeException("Non-TIME trigger event requires a sensor UUID");
+            }
+            if (dto.getTriggerValue() == null){
+                log.error("Cannot create rule - Non-TIME trigger event requires a trigger value");
+                throw new RuntimeException("Non-TIME trigger event requires a trigger value");
+            }
+        }
+        if (dto.getAction() == Action.SET_VALUE){
+            if (dto.getActionValue() == null){
+                log.error("Cannot create rule - SET_VALUE action requires an action value");
+                throw new RuntimeException("SET_VALUE action requires an action value");
+            }
+            if (!device.getType().hasValue()){
+                log.error("Cannot create rule - Device type {} does not support action values", device.getType());
+                throw new RuntimeException("Device type " + device.getType() + " does not support action values");
+            }
+        }
     }
 
     public AutomationRuleResponseDTO updateRule(Long id, AutomationRuleDTO dto) {
@@ -124,17 +173,25 @@ public class AutomationService {
                     log.error("Automation rule not found with ID: {}", id);
                     return new RuntimeException("Automation rule not found with id: " + id);
                 });
+        
+        Device device = deviceService.getDeviceByUuid(dto.getDeviceUuid());
 
-        Device device = deviceService.getDeviceByUuid(dto.getTriggerDeviceUuid());
-        Sensor sensor = sensorService.getSensorByUuid(dto.getTriggerSensorUuid());
+        validateRuleLogic(dto, device);
+
+        Sensor sensor = null;
+        if (dto.getSensorUuid() != null){
+            sensor = sensorService.getSensorByUuid(dto.getSensorUuid());
+        }
 
         log.debug("Updating rule properties for rule ID: {}", id);
         existingRule.setName(dto.getName());
         existingRule.setDescription(dto.getDescription());
-        existingRule.setTriggerDevice(device);
-        existingRule.setTriggerSensor(sensor);
+        existingRule.setEnabled(dto.getEnabled());
+        existingRule.setDevice(device);
+        existingRule.setSensor(sensor);
         existingRule.setTriggerEvent(dto.getTriggerEvent());
         existingRule.setTriggerValue(dto.getTriggerValue());
+        existingRule.setTriggerTime(dto.getTriggerTime());
         existingRule.setAction(dto.getAction());
         existingRule.setActionValue(dto.getActionValue());
 
@@ -153,6 +210,8 @@ public class AutomationService {
                     return new RuntimeException("Automation rule not found with id: " + id);
                 });
 
+        
+
         if (dto.getName() != null) {
             log.debug("Updating rule name to: {}", dto.getName());
             existingRule.setName(dto.getName());
@@ -161,15 +220,15 @@ public class AutomationService {
             log.debug("Updating rule description");
             existingRule.setDescription(dto.getDescription());
         }
-        if (dto.getTriggerDeviceUuid() != null) {
-            Device device = deviceService.getDeviceByUuid(dto.getTriggerDeviceUuid());
-            log.debug("Updating trigger device to ID: {}", dto.getTriggerDeviceUuid());
-            existingRule.setTriggerDevice(device);
+        if (dto.getDeviceUuid() != null) {
+            Device device = deviceService.getDeviceByUuid(dto.getDeviceUuid());
+            log.debug("Updating trigger device to ID: {}", dto.getDeviceUuid());
+            existingRule.setDevice(device);
         }
-        if (dto.getTriggerSensorUuid() != null) {
-            Sensor sensor = sensorService.getSensorByUuid(dto.getTriggerSensorUuid());
-            log.debug("Updating trigger sensor to ID: {}", dto.getTriggerSensorUuid());
-            existingRule.setTriggerSensor(sensor);
+        if (dto.getSensorUuid() != null) {
+            Sensor sensor = sensorService.getSensorByUuid(dto.getSensorUuid());
+            log.debug("Updating trigger sensor to ID: {}", dto.getSensorUuid());
+            existingRule.setSensor(sensor);
         }
         if (dto.getTriggerEvent() != null) {
             log.debug("Updating trigger event to: {}", dto.getTriggerEvent());
@@ -205,7 +264,7 @@ public class AutomationService {
         Sensor sensor = event.getSensor();
         log.debug("Processing sensor update event for sensor ID: {} with value: {}", sensor.getId(), sensor.getValue());
 
-        List<AutomationRule> rules = automationRepository.findByEnabledAndTriggerSensorId(true, sensor.getId());
+        List<AutomationRule> rules = automationRepository.findByEnabledAndSensorId(true, sensor.getId());
         log.debug("Found {} enabled rules associated with sensor ID: {}", rules.size(), sensor.getId());
 
         for (AutomationRule rule : rules) {
@@ -246,21 +305,21 @@ public class AutomationService {
 
     private void goAction(AutomationRule rule) {
         log.debug("Executing action for rule '{}': {} on device ID: {}",
-                rule.getName(), rule.getAction(), rule.getTriggerDevice().getId());
+                rule.getName(), rule.getAction(), rule.getDevice().getId());
 
         switch (rule.getAction()) {
             case TURN_ON:
-                log.info("Turning on device ID: {} for rule '{}'", rule.getTriggerDevice().getId(), rule.getName());
-                deviceService.turnOn(rule.getTriggerDevice());
+                log.info("Turning on device ID: {} for rule '{}'", rule.getDevice().getId(), rule.getName());
+                deviceService.turnOn(rule.getDevice());
                 break;
             case TURN_OFF:
-                log.info("Turning off device ID: {} for rule '{}'", rule.getTriggerDevice().getId(), rule.getName());
-                deviceService.turnOff(rule.getTriggerDevice());
+                log.info("Turning off device ID: {} for rule '{}'", rule.getDevice().getId(), rule.getName());
+                deviceService.turnOff(rule.getDevice());
                 break;
             case SET_VALUE:
                 log.info("Setting value to {} for device ID: {} for rule '{}'",
-                        rule.getActionValue(), rule.getTriggerDevice().getId(), rule.getName());
-                deviceService.setValue(rule.getTriggerDevice(), rule.getActionValue());
+                        rule.getActionValue(), rule.getDevice().getId(), rule.getName());
+                deviceService.setValue(rule.getDevice(), rule.getActionValue());
                 break;
             default:
                 log.warn("Unknown action type: {} for rule ID: {}", rule.getAction(), rule.getId());
@@ -268,5 +327,20 @@ public class AutomationService {
         }
 
         log.debug("Action execution completed for rule '{}'", rule.getName());
+    }
+
+    @Scheduled(cron = "0 * * * * *") // Каждый час в начале часа
+    @Transactional
+    public void checkTimeBasedRules(){
+        LocalTime now = LocalTime.now().withSecond(0).withNano(0);
+        log.info("Checking time-based automation rules at {}", now);
+        List<AutomationRule> rulesToExecute = automationRepository.findActiveTimeRules(now);
+        if (!rulesToExecute.isEmpty()){
+            log.info("Found {} time-based rules to execute", rulesToExecute.size());
+            for (AutomationRule rule : rulesToExecute){
+                log.info("Executing time-based rule: {} (ID: {})", rule.getName(), rule.getId());
+                goAction(rule);
+            }
+        }
     }
 }

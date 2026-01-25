@@ -22,10 +22,12 @@ public class AutomationRuleMapper {
         AutomationRule rule = new AutomationRule();
         rule.setName(dto.getName());
         rule.setDescription(dto.getDescription());
-        rule.setTriggerDevice(device);
-        rule.setTriggerSensor(sensor);
+        rule.setEnabled(dto.getEnabled());
+        rule.setDevice(device);
+        rule.setSensor(sensor);
         rule.setTriggerEvent(dto.getTriggerEvent());
         rule.setTriggerValue(dto.getTriggerValue());
+        rule.setTriggerTime(dto.getTriggerTime());
         rule.setAction(dto.getAction());
         rule.setActionValue(dto.getActionValue());
         return rule;
@@ -36,11 +38,16 @@ public class AutomationRuleMapper {
         dto.setId(rule.getId());
         dto.setName(rule.getName());
         dto.setDescription(rule.getDescription());
-        dto.setTriggerDevice(deviceMapper.toDTO(rule.getTriggerDevice()));
-        dto.setTriggerSensor(sensorMapper.toDTO(rule.getTriggerSensor()));
+        dto.setTriggerDevice(deviceMapper.toDTO(rule.getDevice()));
+        if (rule.getSensor() != null){
+            dto.setTriggerSensor(sensorMapper.toDTO(rule.getSensor()));
+        }else{
+            dto.setTriggerSensor(null);
+        }
         dto.setEnabled(rule.isEnabled());
         dto.setTriggerEvent(rule.getTriggerEvent());
         dto.setTriggerValue(rule.getTriggerValue());
+        dto.setTriggerTime(rule.getTriggerTime());
         dto.setAction(rule.getAction());
         dto.setActionValue(rule.getActionValue());
         return dto;
@@ -50,10 +57,16 @@ public class AutomationRuleMapper {
         AutomationRuleDTO dto = new AutomationRuleDTO();
         dto.setName(rule.getName());
         dto.setDescription(rule.getDescription());
-        dto.setTriggerDeviceUuid(rule.getTriggerDevice().getUuid());
-        dto.setTriggerDeviceUuid(rule.getTriggerSensor().getUuid());
+        dto.setEnabled(rule.isEnabled());
+        dto.setDeviceUuid(rule.getDevice().getUuid());
+        if (rule.getSensor() != null) {
+            dto.setSensorUuid(rule.getSensor().getUuid());
+        } else {
+            dto.setSensorUuid(null);
+        }
         dto.setTriggerEvent(rule.getTriggerEvent());
         dto.setTriggerValue(rule.getTriggerValue());
+        dto.setTriggerTime(rule.getTriggerTime());
         dto.setAction(rule.getAction());
         dto.setActionValue(rule.getActionValue());
         return dto;

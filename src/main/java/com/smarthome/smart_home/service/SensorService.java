@@ -8,8 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.smarthome.smart_home.dto.CreateSensorDTO;
 import com.smarthome.smart_home.dto.SensorUpdateDTO;
+import com.smarthome.smart_home.dto.create.SensorCreateDTO;
 import com.smarthome.smart_home.enums.SensorType;
 import com.smarthome.smart_home.events.SensorUpdatedEvent;
 import com.smarthome.smart_home.exception.ResourceNotFoundException;
@@ -52,7 +52,7 @@ public class SensorService {
     }
 
     @Transactional
-    public Sensor createSensor(CreateSensorDTO createSensorDTO) {
+    public Sensor createSensor(SensorCreateDTO createSensorDTO) {
         log.debug("Creating new sensor '{}' for room ID: {}", createSensorDTO.getName(), createSensorDTO.getRoomId());
         Sensor sensor = new Sensor();
         Room room = roomService.getRoomById(createSensorDTO.getRoomId());

@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.smarthome.smart_home.dto.CreateRoomDTO;
 import com.smarthome.smart_home.dto.RoomDTO;
+import com.smarthome.smart_home.dto.create.RoomCreateDTO;
 import com.smarthome.smart_home.mappers.RoomMapper;
 import com.smarthome.smart_home.model.Room;
 import com.smarthome.smart_home.service.RoomService;
@@ -77,7 +77,7 @@ public class RoomController {
     // Создать новую комнату
     @PostMapping()
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<RoomDTO> createRoom(@Valid @RequestBody CreateRoomDTO createRoomDTO) {
+    public ResponseEntity<RoomDTO> createRoom(@Valid @RequestBody RoomCreateDTO createRoomDTO) {
         log.info("Creating new room with name: {}", createRoomDTO.getName());
 
         Room room = roomMapper.toEntity(createRoomDTO);
@@ -91,7 +91,7 @@ public class RoomController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RoomDTO> updateRoom(@PathVariable @NotNull Long id,
-            @Valid @RequestBody CreateRoomDTO createRoomDTO) {
+            @Valid @RequestBody RoomCreateDTO createRoomDTO) {
         log.info("Updating room with ID: {}", id);
 
         Room room = roomMapper.toEntity(createRoomDTO);

@@ -7,8 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.smarthome.smart_home.dto.CreateDeviceDTO;
 import com.smarthome.smart_home.dto.DeviceUpdateDTO;
+import com.smarthome.smart_home.dto.create.DeviceCreateDTO;
 import com.smarthome.smart_home.enums.DeviceStatus;
 import com.smarthome.smart_home.enums.DeviceType;
 import com.smarthome.smart_home.exception.ResourceNotFoundException;
@@ -74,7 +74,7 @@ public class DeviceService {
         return savedDevice;
     }
     @Transactional
-    public Device createDevice(CreateDeviceDTO createDeviceDTO) {
+    public Device createDevice(DeviceCreateDTO createDeviceDTO) {
         log.debug("Creating new device '{}' for room ID: {}",createDeviceDTO.getName(), createDeviceDTO.getRoomId());
         Device device = new Device();
         Room room = roomService.getRoomById(createDeviceDTO.getRoomId());

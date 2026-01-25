@@ -1,4 +1,4 @@
-package com.smarthome.smart_home.dto;
+package com.smarthome.smart_home.dto.create;
 
 import com.smarthome.smart_home.enums.DeviceStatus;
 import com.smarthome.smart_home.enums.DeviceType;
@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class CreateDeviceDTO {
+public class DeviceCreateDTO {
     @NotBlank(message = "Device name is required")
     private String name;
 

@@ -1,4 +1,4 @@
-package com.smarthome.smart_home.dto;
+package com.smarthome.smart_home.dto.create;
 
 import com.smarthome.smart_home.enums.SensorType;
 
@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class CreateSensorDTO {
+public class SensorCreateDTO {
     @NotBlank(message = "Sensor name is required")
     private String name;
 

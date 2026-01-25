@@ -1,5 +1,7 @@
 package com.smarthome.smart_home.model;
 
+import java.time.LocalTime;
+
 import com.smarthome.smart_home.enums.automation.Action;
 import com.smarthome.smart_home.enums.automation.TriggerEvent;
 
@@ -36,15 +38,16 @@ public class AutomationRule {
     private String description;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trigger_device_id", nullable = false)
-    private Device triggerDevice;
+    private Device device;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "trigger_sensor_id", nullable = false)
-    private Sensor triggerSensor;
+    @JoinColumn(name = "trigger_sensor_id", nullable = true)
+    private Sensor sensor;
 
     private boolean enabled = true;
     @Enumerated(EnumType.STRING)
-    private TriggerEvent triggerEvent; // больше, меньше или равно (для сенсора)
+    private TriggerEvent triggerEvent; // больше, меньше или равно (для сенсора), время
     private Double triggerValue; // значение сенсора по которому триггерится правило
+    private LocalTime triggerTime; // время срабатывания правила, если триггер по времени
     @Enumerated(EnumType.STRING)
     private Action action; // как девайс будет изменен
     private Double actionValue; // значение которое будет применено к девайсу

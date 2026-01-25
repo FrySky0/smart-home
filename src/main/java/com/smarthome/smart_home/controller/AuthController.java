@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.smarthome.smart_home.dto.AuthRequestDTO;
-import com.smarthome.smart_home.dto.AuthResponseDTO;
+import com.smarthome.smart_home.dto.auth.AuthRequestDTO;
+import com.smarthome.smart_home.dto.auth.AuthResponseDTO;
 import com.smarthome.smart_home.model.User;
 import com.smarthome.smart_home.service.JwtService;
 import com.smarthome.smart_home.service.UserService;

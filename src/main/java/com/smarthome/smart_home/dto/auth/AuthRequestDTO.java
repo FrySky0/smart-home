@@ -1,4 +1,4 @@
-package com.smarthome.smart_home.dto;
+package com.smarthome.smart_home.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

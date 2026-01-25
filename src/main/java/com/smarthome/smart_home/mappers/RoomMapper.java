@@ -4,8 +4,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.smarthome.smart_home.dto.CreateRoomDTO;
 import com.smarthome.smart_home.dto.RoomDTO;
+import com.smarthome.smart_home.dto.create.RoomCreateDTO;
 import com.smarthome.smart_home.model.Room;
 
 @Component
@@ -38,7 +38,7 @@ public class RoomMapper {
     }
 
     // Преобразование DTO в сущность Room
-    public Room toEntity(CreateRoomDTO dto) {
+    public Room toEntity(RoomCreateDTO dto) {
         Room room = new Room();
         room.setName(dto.getName());
         room.setFloor(dto.getFloor());

@@ -2,8 +2,8 @@ package com.smarthome.smart_home.mappers;
 
 import org.springframework.stereotype.Component;
 
-import com.smarthome.smart_home.dto.CreateDeviceDTO;
 import com.smarthome.smart_home.dto.DeviceDTO;
+import com.smarthome.smart_home.dto.create.DeviceCreateDTO;
 import com.smarthome.smart_home.model.Device;
 
 @Component
@@ -22,7 +22,7 @@ public class DeviceMapper {
     }
 
     // Преобразование DTO в сущность Device
-    public Device toEntity(CreateDeviceDTO createDeviceDTO) {
+    public Device toEntity(DeviceCreateDTO createDeviceDTO) {
         Device device = new Device();
         device.setName(createDeviceDTO.getName());
         device.setType(createDeviceDTO.getType());

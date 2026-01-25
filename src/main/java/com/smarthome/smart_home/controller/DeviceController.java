@@ -18,15 +18,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.smarthome.smart_home.dto.CreateDeviceDTO;
 import com.smarthome.smart_home.dto.DeviceDTO;
 import com.smarthome.smart_home.dto.DeviceUpdateDTO;
+import com.smarthome.smart_home.dto.create.DeviceCreateDTO;
 import com.smarthome.smart_home.enums.DeviceStatus;
 import com.smarthome.smart_home.enums.DeviceType;
 import com.smarthome.smart_home.mappers.DeviceMapper;
 import com.smarthome.smart_home.model.Device;
 import com.smarthome.smart_home.service.DeviceService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -46,11 +48,12 @@ public class DeviceController {
     }
 
     // Получить все устройства, с возможностью фильтрации по комнате, типу и статусу
+    @Operation(summary = "Получить все устройства с возможностью фильтрации", description = "Получить список всех устройств с возможностью фильтрации по комнате, типу и статусу устройства.")
     @GetMapping
     public ResponseEntity<Page<DeviceDTO>> getAllDevices(
-            @RequestParam(required = false) Long roomId,
-            @RequestParam(required = false) DeviceType type,
-            @RequestParam(required = false) DeviceStatus status,
+            @Parameter(description="Поиск по ID комнаты, в которой стоит этот девайс") @RequestParam(required = false) Long roomId,
+            @Parameter(description="Поиск по типу девайса") @RequestParam(required = false) DeviceType type,
+            @Parameter(description="Поиск по статусу") @RequestParam(required = false) DeviceStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
@@ -73,6 +76,7 @@ public class DeviceController {
     }
 
     // Получить устройство по ID
+    @Operation(summary = "Получить устройство по ID", description = "Получить детали устройства по его уникальному идентификатору.")
     @GetMapping("/{id}")
     public ResponseEntity<DeviceDTO> getDeviceById(@PathVariable @NotNull Long id) {
         log.info("Getting device by ID: {}", id);
@@ -83,9 +87,10 @@ public class DeviceController {
     }
 
     // Создать новое устройство
+    @Operation(summary = "Создать новое устройство", description = "Создать новое устройство с указанными параметрами.")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<DeviceDTO> createDevice(@Valid @RequestBody CreateDeviceDTO createDeviceDTO) {
+    public ResponseEntity<DeviceDTO> createDevice(@Valid @RequestBody DeviceCreateDTO createDeviceDTO) {
         log.info("Creating new device with name: {}, type: {}, roomId: {}",
                 createDeviceDTO.getName(), createDeviceDTO.getType(), createDeviceDTO.getRoomId());
 
@@ -96,6 +101,7 @@ public class DeviceController {
         return ResponseEntity.status(HttpStatus.CREATED).body(deviceDTO);
     }
 
+    @Operation(summary = "Полностью обновить устройство", description = "Обновить все поля существующего устройства по его ID.")
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<DeviceDTO> updateDeviceFull(@PathVariable @NotNull Long id, @Valid @RequestBody DeviceUpdateDTO deviceUpdateDTO) {
@@ -107,6 +113,7 @@ public class DeviceController {
         return ResponseEntity.ok(deviceDTO);
     }
 
+    @Operation(summary = "Частично обновить устройство", description = "Обновить определённые поля существующего устройства по его ID.")
     @PatchMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<DeviceDTO> updateDevicePartially(@PathVariable @NotNull Long id,
@@ -120,6 +127,7 @@ public class DeviceController {
         return ResponseEntity.ok(deviceDTO);
     }
 
+    @Operation(summary = "Удалить устройство", description = "Удалить устройство по его уникальному идентификатору.")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<Void> deleteDevice(@PathVariable @NotNull Long id) {
