@@ -24,11 +24,14 @@ import com.smarthome.smart_home.dto.create.AutomationRuleCreateDTO;
 import com.smarthome.smart_home.dto.response.AutomationRuleResponseDTO;
 import com.smarthome.smart_home.dto.update.patch.AutomationRulePatchDTO;
 import com.smarthome.smart_home.dto.update.put.AutomationRulePutDTO;
+import com.smarthome.smart_home.enums.activitylog.ComponentName;
+import com.smarthome.smart_home.enums.activitylog.LogAction;
 import com.smarthome.smart_home.enums.automation.Action;
 import com.smarthome.smart_home.enums.automation.TriggerEvent;
 import com.smarthome.smart_home.mappers.AutomationRuleMapper;
 import com.smarthome.smart_home.model.AutomationRule;
 import com.smarthome.smart_home.service.AutomationService;
+import com.smarthome.smart_home.service.LogService;
 import com.smarthome.smart_home.service.TelegramService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,11 +50,13 @@ public class AutomationController {
     private final AutomationService automationService;
     private final AutomationRuleMapper automationRuleMapper;
     private final TelegramService telegramService;
+    private final LogService logService;
 
-    public AutomationController(AutomationService automationService, AutomationRuleMapper automationRuleMapper, TelegramService telegramService) {
+    public AutomationController(AutomationService automationService, AutomationRuleMapper automationRuleMapper, TelegramService telegramService,LogService logService) {
         this.automationService = automationService;
         this.automationRuleMapper = automationRuleMapper;
         this.telegramService = telegramService;
+        this.logService = logService;
     }
 
     // Получить все правила
@@ -130,6 +135,7 @@ public class AutomationController {
         log.info("Successfully created automation rule with ID: {}", createdRule.getId());
         log.debug("Created automation rule details: {}", createdRule);
         telegramService.sendLog("New automation rule created: " + createdRule.getName() + " (ID: " + createdRule.getId() + ")");
+        logService.logEntity(ComponentName.AutomationRule, LogAction.CREATED, createdRule);
         return ResponseEntity.ok(createdRule);
     }
 
@@ -147,6 +153,7 @@ public class AutomationController {
         log.info("Successfully updated automation rule with ID: {}", id);
         log.debug("Updated automation rule details: {}", updatedRule);
         telegramService.sendLog("Automation rule " + updatedRule.getName() + " (ID: " + updatedRule.getId() + ") fully updated");
+        logService.logEntity(ComponentName.AutomationRule, LogAction.UPDATED, updatedRule);
         return ResponseEntity.ok(updatedRule);
     }
     @Operation(summary = "Частично обновить правило автоматизации", description="Частично обновляет существующее правило автоматизации по его уникальному идентификатору на основе предоставленных данных.")
@@ -163,7 +170,7 @@ public class AutomationController {
         log.info("Successfully partially updated automation rule with ID: {}", id);
         log.debug("Partially updated automation rule details: {}", updatedRule);
         telegramService.sendLog("Automation rule " + updatedRule.getName() + " (ID: " + updatedRule.getId() + ") partially updated");
-
+        logService.logEntity(ComponentName.AutomationRule, LogAction.UPDATED, updatedRule);
         return ResponseEntity.ok(updatedRule);
     }
 
@@ -177,6 +184,7 @@ public class AutomationController {
 
         log.info("Successfully deleted automation rule with ID: {}", id);
         telegramService.sendLog("Automation rule with ID " + id + " has been deleted.");
+        logService.log(ComponentName.AutomationRule, LogAction.DELETED, "ID:"+id);
         return ResponseEntity.noContent().build();
     }
 

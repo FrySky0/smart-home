@@ -24,9 +24,12 @@ import com.smarthome.smart_home.dto.update.patch.DevicePatchDTO;
 import com.smarthome.smart_home.dto.update.put.DevicePutDTO;
 import com.smarthome.smart_home.enums.DeviceStatus;
 import com.smarthome.smart_home.enums.DeviceType;
+import com.smarthome.smart_home.enums.activitylog.ComponentName;
+import com.smarthome.smart_home.enums.activitylog.LogAction;
 import com.smarthome.smart_home.mappers.DeviceMapper;
 import com.smarthome.smart_home.model.Device;
 import com.smarthome.smart_home.service.DeviceService;
+import com.smarthome.smart_home.service.LogService;
 import com.smarthome.smart_home.service.TelegramService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,11 +47,13 @@ public class DeviceController {
     private final DeviceService deviceService;
     private final DeviceMapper deviceMapper;
     private final TelegramService telegramService;
+    private final LogService logService;
 
-    public DeviceController(DeviceService deviceService, DeviceMapper deviceMapper, TelegramService telegramService) {
+    public DeviceController(DeviceService deviceService, DeviceMapper deviceMapper, TelegramService telegramService,LogService logService) {
         this.deviceService = deviceService;
         this.deviceMapper = deviceMapper;
         this.telegramService = telegramService;
+        this.logService = logService;
     }
 
     // Получить все устройства, с возможностью фильтрации по комнате, типу и статусу
@@ -104,6 +109,7 @@ public class DeviceController {
 
         log.info("Successfully created device with ID: {}", device.getId());
         telegramService.sendLog("New device created: " + device.getName() + " (ID: " + device.getId() + ")");
+        logService.logEntity(ComponentName.Device, LogAction.CREATED, deviceDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(deviceDTO);
     }
 
@@ -117,6 +123,7 @@ public class DeviceController {
         DeviceResponseDTO deviceDTO = deviceMapper.toResponseDTO(device);
         log.info("The device with ID {} has been successfully fully updated", id);
         telegramService.sendLog("Device " + device.getName() + " (ID: " + device.getId() + ") fully updated");
+        logService.logEntity(ComponentName.Device, LogAction.UPDATED, deviceDTO);
         return ResponseEntity.ok(deviceDTO);
     }
 
@@ -132,6 +139,7 @@ public class DeviceController {
 
         log.info("The device with ID {} has been successfully partially updated", id);
         telegramService.sendLog("Device " + updatedDevice.getName() + " (ID: " + updatedDevice.getId() + ") partially updated");
+        logService.logEntity(ComponentName.Device, LogAction.UPDATED, deviceDTO);
         return ResponseEntity.ok(deviceDTO);
     }
 
@@ -145,6 +153,7 @@ public class DeviceController {
 
         log.info("Successfully deleted device with ID: {}", id);
         telegramService.sendLog("Device with ID " + id + " has been deleted");
+        logService.log(ComponentName.Device, LogAction.DELETED, "ID:"+id);
         return ResponseEntity.noContent().build();
     }
 }

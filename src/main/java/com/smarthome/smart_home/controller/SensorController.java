@@ -18,13 +18,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smarthome.smart_home.dto.create.SensorCreateDTO;
 import com.smarthome.smart_home.dto.response.SensorResponseDTO;
 import com.smarthome.smart_home.dto.update.patch.SensorPatchDTO;
 import com.smarthome.smart_home.dto.update.put.SensorPutDTO;
 import com.smarthome.smart_home.enums.SensorType;
+import com.smarthome.smart_home.enums.activitylog.ComponentName;
+import com.smarthome.smart_home.enums.activitylog.LogAction;
 import com.smarthome.smart_home.mappers.SensorMapper;
 import com.smarthome.smart_home.model.Sensor;
+import com.smarthome.smart_home.service.LogService;
 import com.smarthome.smart_home.service.SensorService;
 import com.smarthome.smart_home.service.TelegramService;
 
@@ -43,11 +47,15 @@ public class SensorController {
     private final SensorService sensorService;
     private final SensorMapper sensorMapper;
     private final TelegramService telegramService;
+    private final LogService logService;
+    private final ObjectMapper objectMapper;
 
-    public SensorController(SensorService sensorService, SensorMapper sensorMapper, TelegramService telegramService) {
+    public SensorController(SensorService sensorService, SensorMapper sensorMapper, TelegramService telegramService, LogService logService, ObjectMapper objectMapper) {
         this.sensorService = sensorService;
         this.sensorMapper = sensorMapper;
         this.telegramService = telegramService;
+        this.logService = logService;
+        this.objectMapper = objectMapper;
     }
 
     // Получить все сенсоры, с возможностью фильтрации по комнате и типу
@@ -103,7 +111,11 @@ public class SensorController {
         SensorResponseDTO sensorDTO = sensorMapper.toDTO(sensor);
 
         log.info("Successfully created sensor with ID: {} and UUID: {}", sensor.getId(), sensor.getUuid());
+        
         telegramService.sendLog("New sensor created: " + sensor.getName() + " (ID: " + sensor.getId() + ")");
+        
+        logService.logEntity(ComponentName.Sensor, LogAction.CREATED, sensorDTO);
+        
         return ResponseEntity.status(HttpStatus.CREATED).body(sensorDTO);
     }
 
@@ -119,6 +131,7 @@ public class SensorController {
 
         log.info("The sensor with ID {} has been successfully fully updated", id);
         telegramService.sendLog("Sensor " + sensor.getName() + " (ID: " + sensor.getId() + ") fully updated");
+        logService.logEntity(ComponentName.Sensor, LogAction.UPDATED, sensorDTO);
         return ResponseEntity.ok(sensorDTO);
     }
     @Operation(summary = "Частично обновить сенсор", description = "Обновить определённые поля существующего сенсора по его ID.")
@@ -129,11 +142,12 @@ public class SensorController {
         log.info("Partially updating sensor with ID: {}", id);
 
         Sensor updatedSensor = sensorService.updatePartially(id, sensorPatchDTO);
-        SensorResponseDTO updatedSensorDTO = sensorMapper.toDTO(updatedSensor);
+        SensorResponseDTO sensorDTO = sensorMapper.toDTO(updatedSensor);
 
         log.info("The sensor with ID {} has been successfully partially updated", id);
         telegramService.sendLog("Sensor " + updatedSensor.getName() + " (ID: " + updatedSensor.getId() + ") partially updated");
-        return ResponseEntity.ok(updatedSensorDTO);
+        logService.logEntity(ComponentName.Sensor, LogAction.UPDATED, sensorDTO);
+        return ResponseEntity.ok(sensorDTO);
     }
 
     // Удалить сенсор
@@ -147,6 +161,7 @@ public class SensorController {
 
         log.info("Successfully deleted sensor with ID: {}", id);
         telegramService.sendLog("Sensor with ID " + id + " has been deleted");
+        logService.log(ComponentName.Sensor, LogAction.DELETED, "ID:"+id);
         return ResponseEntity.noContent().build();
     }
 }

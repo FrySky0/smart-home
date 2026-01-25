@@ -71,6 +71,13 @@
 			<artifactId>spring-dotenv</artifactId>
 			<version>5.0.1</version>
 		</dependency>
+		<!-- Source: https://mvnrepository.com/artifact/com.github.librepdf/openpdf -->
+		<dependency>
+			<groupId>com.github.librepdf</groupId>
+			<artifactId>openpdf</artifactId>
+			<version>3.0.0</version>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>

@@ -13,8 +13,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.smarthome.smart_home.enums.activitylog.ComponentName;
+import com.smarthome.smart_home.enums.activitylog.LogAction;
 import com.smarthome.smart_home.model.User;
 import com.smarthome.smart_home.service.FileService;
+import com.smarthome.smart_home.service.LogService;
 import com.smarthome.smart_home.service.TelegramService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class ConfigFileController {
     private final FileService fileService;
     private final TelegramService telegramService;
+    private final LogService logService;
     @Operation(summary= "Импорт комнат и устройств из JSON файла")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -40,6 +44,7 @@ public class ConfigFileController {
             return ResponseEntity.badRequest().body("File is empty");
         }
         fileService.importConfiguration(file);
+        logService.log(ComponentName.Configuration, LogAction.IMPORTED, "");
         return ResponseEntity.ok(Map.of(
             "message", "Configuration imported successfully",
             "fileName", file.getOriginalFilename()
@@ -52,6 +57,7 @@ public class ConfigFileController {
     public ResponseEntity<byte[]> exportConfig(@AuthenticationPrincipal User user) {
         telegramService.sendLog("User '" + user.getUsername() + "' started configuration export");
         byte[] data = fileService.exportConfigurationJSON();
+        logService.log(ComponentName.Configuration, LogAction.EXPORTED, "");
         return ResponseEntity.ok()
             .header("Content-Disposition", "attachment; filename=smart_home_report.json")
             .contentType(MediaType.APPLICATION_JSON)

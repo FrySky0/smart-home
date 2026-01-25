@@ -21,8 +21,11 @@ import com.smarthome.smart_home.dto.create.RoomCreateDTO;
 import com.smarthome.smart_home.dto.response.RoomResponseDTO;
 import com.smarthome.smart_home.dto.update.patch.RoomPatchDTO;
 import com.smarthome.smart_home.dto.update.put.RoomPutDTO;
+import com.smarthome.smart_home.enums.activitylog.ComponentName;
+import com.smarthome.smart_home.enums.activitylog.LogAction;
 import com.smarthome.smart_home.mappers.RoomMapper;
 import com.smarthome.smart_home.model.Room;
+import com.smarthome.smart_home.service.LogService;
 import com.smarthome.smart_home.service.RoomService;
 import com.smarthome.smart_home.service.TelegramService;
 
@@ -40,11 +43,13 @@ public class RoomController {
     private final RoomService roomService;
     private final RoomMapper roomMapper;
     private final TelegramService telegramService;
+    private final LogService logService;
 
-    public RoomController(RoomService roomService, RoomMapper roomMapper, TelegramService telegramService) {
+    public RoomController(RoomService roomService, RoomMapper roomMapper, TelegramService telegramService, LogService logService) {
         this.roomService = roomService;
         this.roomMapper = roomMapper;
         this.telegramService = telegramService;
+        this.logService = logService;
     }
 
     @Operation(summary = "Получить все комнаты с возможностью фильтрации", description = "Получить список всех комнат с возможностью фильтрации по этажу и названию комнаты.")
@@ -92,10 +97,11 @@ public class RoomController {
 
         Room room = roomMapper.toEntity(createRoomDTO);
         Room savedRoom = roomService.createRoom(room);
-
+        RoomResponseDTO roomDTO = roomMapper.toDTO(savedRoom);
         log.info("Room created successfully with ID: {}", savedRoom.getId());
-        telegramService.sendLog("New room created: " + savedRoom.getName() + " (ID: " + savedRoom.getId() + ")");
-        return ResponseEntity.ok(roomMapper.toDTO(savedRoom));
+        telegramService.sendLog("New room created: " + roomDTO.getName() + " (ID: " + roomDTO.getId() + ")");
+        logService.logEntity(ComponentName.Room, LogAction.CREATED, roomDTO);
+        return ResponseEntity.ok(roomDTO);
     }
 
     // Обновить комнату
@@ -107,10 +113,11 @@ public class RoomController {
         log.info("Updating room with ID: {}", id);
 
         Room updatedRoom = roomService.updateFull(id, roomPutDTO);
-
+        RoomResponseDTO roomDTO = roomMapper.toDTO(updatedRoom);
         log.info("Room updated successfully with ID: {}", id);
-        telegramService.sendLog("Room " + updatedRoom.getName() + " (ID: " + updatedRoom.getId() + ") fully updated");
-        return ResponseEntity.ok(roomMapper.toDTO(updatedRoom));
+        telegramService.sendLog("Room " + roomDTO.getName() + " (ID: " + roomDTO.getId() + ") fully updated");
+        logService.logEntity(ComponentName.Room, LogAction.UPDATED, roomDTO);
+        return ResponseEntity.ok(roomDTO);
     }
 
     @Operation(summary = "Частично обновить комнату", description = "Частично обновить информацию о комнате.")
@@ -121,10 +128,12 @@ public class RoomController {
         log.info("Updating room with ID: {}", id);
 
         Room updatedRoom = roomService.updatePartially(id, roomPatchDTO);
+        RoomResponseDTO roomDTO = roomMapper.toDTO(updatedRoom);
 
         log.info("Room updated successfully with ID: {}", id);
-        telegramService.sendLog("Room " + updatedRoom.getName() + " (ID: " + updatedRoom.getId() + ") partially updated");
-        return ResponseEntity.ok(roomMapper.toDTO(updatedRoom));
+        telegramService.sendLog("Room " + roomDTO.getName() + " (ID: " + roomDTO.getId() + ") partially updated");
+        logService.logEntity(ComponentName.Room, LogAction.UPDATED, roomDTO);
+        return ResponseEntity.ok(roomDTO);
     }
     // Удалить комнату
     @Operation(summary = "Удалить комнату", description = "Удалить комнату по её уникальному идентификатору.")
@@ -137,6 +146,7 @@ public class RoomController {
 
         log.info("Room deleted successfully with ID: {}", id);
         telegramService.sendLog("Room with ID " + id + " has been deleted");
+        logService.log(ComponentName.Room, LogAction.UPDATED, "ID:"+id);
         return ResponseEntity.noContent().build();
     }
 }

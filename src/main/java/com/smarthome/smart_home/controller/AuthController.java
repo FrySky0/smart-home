@@ -14,8 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.smarthome.smart_home.dto.auth.AuthRequestDTO;
 import com.smarthome.smart_home.dto.auth.AuthResponseDTO;
+import com.smarthome.smart_home.enums.activitylog.ComponentName;
+import com.smarthome.smart_home.enums.activitylog.LogAction;
 import com.smarthome.smart_home.model.User;
 import com.smarthome.smart_home.service.JwtService;
+import com.smarthome.smart_home.service.LogService;
 import com.smarthome.smart_home.service.TelegramService;
 import com.smarthome.smart_home.service.UserService;
 
@@ -37,6 +40,7 @@ public class AuthController {
     private final UserService userService;
     private final JwtService jwtService;
     private final TelegramService telegramService;
+    private final LogService logService;
 
     @Value("${jwt.cookie-name}")
     private String cookieName;
@@ -61,6 +65,7 @@ public class AuthController {
 
         log.info("User registered successfully: {}", user.getUsername());
         telegramService.sendLog("New user registered: " + user.getUsername());
+        logService.log(ComponentName.Auth, LogAction.REGISTER, "username:"+user.getUsername()+" email:"+user.getEmail());
         return ResponseEntity.ok(new AuthResponseDTO(user.getUsername(), user.getEmail(), "Registration successful"));
     }
     @Operation(summary = "Вход пользователя", description = "Аутентификация пользователя с указанием имени и пароля.")
@@ -81,6 +86,7 @@ public class AuthController {
 
         log.info("User logged in successfully: {}", user.getUsername());
         telegramService.sendLog("User logged in: " + user.getUsername());
+        logService.log(ComponentName.Auth, LogAction.LOGIN, "username:"+user.getUsername()+" email:"+user.getEmail());
         return ResponseEntity.ok(new AuthResponseDTO(user.getUsername(), user.getEmail(), "Login successful"));
     }
     @Operation(summary = "Выход пользователя", description = "Выход пользователя и удаление аутентификационного cookie.")
