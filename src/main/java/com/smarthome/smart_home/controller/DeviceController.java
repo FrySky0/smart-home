@@ -18,9 +18,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.smarthome.smart_home.dto.DeviceDTO;
-import com.smarthome.smart_home.dto.DeviceUpdateDTO;
 import com.smarthome.smart_home.dto.create.DeviceCreateDTO;
+import com.smarthome.smart_home.dto.response.DeviceResponseDTO;
+import com.smarthome.smart_home.dto.update.patch.DevicePatchDTO;
+import com.smarthome.smart_home.dto.update.put.DevicePutDTO;
 import com.smarthome.smart_home.enums.DeviceStatus;
 import com.smarthome.smart_home.enums.DeviceType;
 import com.smarthome.smart_home.mappers.DeviceMapper;
@@ -50,7 +51,7 @@ public class DeviceController {
     // Получить все устройства, с возможностью фильтрации по комнате, типу и статусу
     @Operation(summary = "Получить все устройства с возможностью фильтрации", description = "Получить список всех устройств с возможностью фильтрации по комнате, типу и статусу устройства.")
     @GetMapping
-    public ResponseEntity<Page<DeviceDTO>> getAllDevices(
+    public ResponseEntity<Page<DeviceResponseDTO>> getAllDevices(
             @Parameter(description="Поиск по ID комнаты, в которой стоит этот девайс") @RequestParam(required = false) Long roomId,
             @Parameter(description="Поиск по типу девайса") @RequestParam(required = false) DeviceType type,
             @Parameter(description="Поиск по статусу") @RequestParam(required = false) DeviceStatus status,
@@ -68,8 +69,8 @@ public class DeviceController {
                 : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<DeviceDTO> devicePage = deviceService.getDevicesByFilters(roomId, type, status, pageable)
-                .map(deviceMapper::toDTO);
+        Page<DeviceResponseDTO> devicePage = deviceService.getDevicesByFilters(roomId, type, status, pageable)
+                .map(deviceMapper::toResponseDTO);
 
         log.info("Successfully retrieved {} devices on page {}", devicePage.getNumberOfElements(), page);
         return ResponseEntity.ok(devicePage);
@@ -78,24 +79,24 @@ public class DeviceController {
     // Получить устройство по ID
     @Operation(summary = "Получить устройство по ID", description = "Получить детали устройства по его уникальному идентификатору.")
     @GetMapping("/{id}")
-    public ResponseEntity<DeviceDTO> getDeviceById(@PathVariable @NotNull Long id) {
+    public ResponseEntity<DeviceResponseDTO> getDeviceById(@PathVariable @NotNull Long id) {
         log.info("Getting device by ID: {}", id);
 
         Device device = deviceService.getDeviceById(id);
         log.info("Device found with ID: {}", id);
-        return ResponseEntity.ok(deviceMapper.toDTO(device));
+        return ResponseEntity.ok(deviceMapper.toResponseDTO(device));
     }
 
     // Создать новое устройство
     @Operation(summary = "Создать новое устройство", description = "Создать новое устройство с указанными параметрами.")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<DeviceDTO> createDevice(@Valid @RequestBody DeviceCreateDTO createDeviceDTO) {
+    public ResponseEntity<DeviceResponseDTO> createDevice(@Valid @RequestBody DeviceCreateDTO deviceCreateDTO) {
         log.info("Creating new device with name: {}, type: {}, roomId: {}",
-                createDeviceDTO.getName(), createDeviceDTO.getType(), createDeviceDTO.getRoomId());
+                deviceCreateDTO.getName(), deviceCreateDTO.getType(), deviceCreateDTO.getRoomId());
 
-        Device device = deviceService.createDevice(createDeviceDTO);
-        DeviceDTO deviceDTO = deviceMapper.toDTO(device);
+        Device device = deviceService.createDevice(deviceCreateDTO);
+        DeviceResponseDTO deviceDTO = deviceMapper.toResponseDTO(device);
 
         log.info("Successfully created device with ID: {}", device.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(deviceDTO);
@@ -104,11 +105,11 @@ public class DeviceController {
     @Operation(summary = "Полностью обновить устройство", description = "Обновить все поля существующего устройства по его ID.")
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
-    public ResponseEntity<DeviceDTO> updateDeviceFull(@PathVariable @NotNull Long id, @Valid @RequestBody DeviceUpdateDTO deviceUpdateDTO) {
+    public ResponseEntity<DeviceResponseDTO> updateDeviceFull(@PathVariable @NotNull Long id, @Valid @RequestBody DevicePutDTO devicePutDTO) {
         log.info("Fully updating device with ID: {}", id);
 
-        Device device = deviceService.updateFull(id, deviceUpdateDTO);
-        DeviceDTO deviceDTO = deviceMapper.toDTO(device);
+        Device device = deviceService.updateFull(id, devicePutDTO);
+        DeviceResponseDTO deviceDTO = deviceMapper.toResponseDTO(device);
         log.info("The device with ID {} has been successfully fully updated", id);
         return ResponseEntity.ok(deviceDTO);
     }
@@ -116,12 +117,12 @@ public class DeviceController {
     @Operation(summary = "Частично обновить устройство", description = "Обновить определённые поля существующего устройства по его ID.")
     @PatchMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
-    public ResponseEntity<DeviceDTO> updateDevicePartially(@PathVariable @NotNull Long id,
-            @Valid @RequestBody @NotNull DeviceUpdateDTO deviceUpdateDTO) {
+    public ResponseEntity<DeviceResponseDTO> updateDevicePartially(@PathVariable @NotNull Long id,
+            @Valid @RequestBody @NotNull DevicePatchDTO devicePatchDTO) {
         log.info("Partially updating device with ID: {}", id);
 
-        Device updatedDevice = deviceService.updatePartially(id, deviceUpdateDTO);
-        DeviceDTO deviceDTO = deviceMapper.toDTO(updatedDevice);
+        Device updatedDevice = deviceService.updatePartially(id, devicePatchDTO);
+        DeviceResponseDTO deviceDTO = deviceMapper.toResponseDTO(updatedDevice);
 
         log.info("The device with ID {} has been successfully partially updated", id);
         return ResponseEntity.ok(deviceDTO);

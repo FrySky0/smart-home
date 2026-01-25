@@ -5,6 +5,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.smarthome.smart_home.dto.update.patch.RoomPatchDTO;
+import com.smarthome.smart_home.dto.update.put.RoomPutDTO;
 import com.smarthome.smart_home.exception.ResourceNotFoundException;
 import com.smarthome.smart_home.model.Room;
 import com.smarthome.smart_home.repository.RoomRepository;
@@ -93,6 +95,48 @@ public class RoomService {
         log.info("Successfully updated room: {} (id: {})", updatedRoom.getName(), updatedRoom.getId());
         return updatedRoom;
     }
+    @Transactional
+    public Room updateFull(Long id, RoomPutDTO roomPutDTO) {
+        log.info("Fully updating room with id: {}", id);
+        Room existingRoom = getRoomById(id);
+        
+        if (roomPutDTO.getFloor() < 0) {
+            log.warn("Attempt to fully update room {} with invalid floor: {}", id, roomPutDTO.getFloor());
+            throw new ValidationException("Floor must be a positive number");
+        }
+
+        log.debug("Fully updating room {}: name from '{}' to '{}', floor from {} to {}",
+                id, existingRoom.getName(), roomPutDTO.getName(),
+                existingRoom.getFloor(), roomPutDTO.getFloor());
+
+        existingRoom.setName(roomPutDTO.getName());
+        existingRoom.setFloor(roomPutDTO.getFloor());
+        Room updatedRoom = roomRepository.save(existingRoom);
+        log.info("Successfully fully updated room: {} (id: {})", updatedRoom.getName(), updatedRoom.getId());
+        return updatedRoom;
+    }
+
+    public Room updatePartially(Long id, RoomPatchDTO roomPatchDTO) {
+        log.info("Partially updating room with id: {}", id);
+        Room existingRoom = getRoomById(id);
+
+        if (roomPatchDTO.getName() != null) {
+            existingRoom.setName(roomPatchDTO.getName());
+        }
+        if (roomPatchDTO.getFloor() != null) {
+            if (roomPatchDTO.getFloor() < 0) {
+                log.warn("Attempt to partially update room {} with invalid floor: {}", id, roomPatchDTO.getFloor());
+                throw new ValidationException("Floor must be a positive number");
+            }
+            log.debug("Updating room {} floor from {} to {}", id, existingRoom.getFloor(), roomPatchDTO.getFloor());
+            existingRoom.setFloor(roomPatchDTO.getFloor());
+        }
+
+        Room updatedRoom = roomRepository.save(existingRoom);
+        log.info("Successfully partially updated room: {} (id: {})", updatedRoom.getName(), updatedRoom.getId());
+        return updatedRoom;
+    }
+
     @Transactional
     public void deleteRoom(Long id) {
         log.info("Deleting room with id: {}", id);

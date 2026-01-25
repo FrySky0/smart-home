@@ -1,4 +1,4 @@
-package com.smarthome.smart_home.dto;
+package com.smarthome.smart_home.dto.response;
 
 import java.util.UUID;
 
@@ -7,7 +7,7 @@ import com.smarthome.smart_home.enums.SensorType;
 import lombok.Data;
 
 @Data
-public class SensorDTO {
+public class SensorResponseDTO {
     private Long id;
     private String name;
     private SensorType type;

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.smarthome.smart_home.dto.RoomDTO;
 import com.smarthome.smart_home.dto.create.RoomCreateDTO;
+import com.smarthome.smart_home.dto.response.RoomResponseDTO;
+import com.smarthome.smart_home.dto.update.patch.RoomPatchDTO;
+import com.smarthome.smart_home.dto.update.put.RoomPutDTO;
 import com.smarthome.smart_home.mappers.RoomMapper;
 import com.smarthome.smart_home.model.Room;
 import com.smarthome.smart_home.service.RoomService;
@@ -41,7 +44,7 @@ public class RoomController {
     }
 
     @GetMapping()
-    public ResponseEntity<Page<RoomDTO>> getAllRooms(
+    public ResponseEntity<Page<RoomResponseDTO>> getAllRooms(
             @RequestParam(required = false) Integer floor,
             @RequestParam(required = false) String name,
             @RequestParam(defaultValue = "0") int page,
@@ -57,7 +60,7 @@ public class RoomController {
                 : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<RoomDTO> roomPage = roomService.getRoomsByFilters(floor,name,pageable)
+        Page<RoomResponseDTO> roomPage = roomService.getRoomsByFilters(floor,name,pageable)
                 .map(roomMapper::toDTO);
 
         log.info("Successfully retrieved {} rooms", roomPage.getNumberOfElements());
@@ -66,7 +69,7 @@ public class RoomController {
 
     // Получить комнату по ID
     @GetMapping("/{id}")
-    public ResponseEntity<RoomDTO> getRoomById(@PathVariable @NotNull Long id) {
+    public ResponseEntity<RoomResponseDTO> getRoomById(@PathVariable @NotNull Long id) {
         log.info("Getting room by ID: {}", id);
 
         Room room = roomService.getRoomById(id);
@@ -77,7 +80,7 @@ public class RoomController {
     // Создать новую комнату
     @PostMapping()
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<RoomDTO> createRoom(@Valid @RequestBody RoomCreateDTO createRoomDTO) {
+    public ResponseEntity<RoomResponseDTO> createRoom(@Valid @RequestBody RoomCreateDTO createRoomDTO) {
         log.info("Creating new room with name: {}", createRoomDTO.getName());
 
         Room room = roomMapper.toEntity(createRoomDTO);
@@ -90,17 +93,27 @@ public class RoomController {
     // Обновить комнату
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<RoomDTO> updateRoom(@PathVariable @NotNull Long id,
-            @Valid @RequestBody RoomCreateDTO createRoomDTO) {
+    public ResponseEntity<RoomResponseDTO> updateRoomFull(@PathVariable @NotNull Long id,
+            @Valid @RequestBody RoomPutDTO roomPutDTO) {
         log.info("Updating room with ID: {}", id);
 
-        Room room = roomMapper.toEntity(createRoomDTO);
-        Room updatedRoom = roomService.updateRoom(id, room);
+        Room updatedRoom = roomService.updateFull(id, roomPutDTO);
 
         log.info("Room updated successfully with ID: {}", id);
         return ResponseEntity.ok(roomMapper.toDTO(updatedRoom));
     }
 
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<RoomResponseDTO> updateRoomPartially(@PathVariable @NotNull Long id,
+            @Valid @RequestBody RoomPatchDTO roomPatchDTO) {
+        log.info("Updating room with ID: {}", id);
+
+        Room updatedRoom = roomService.updatePartially(id, roomPatchDTO);
+
+        log.info("Room updated successfully with ID: {}", id);
+        return ResponseEntity.ok(roomMapper.toDTO(updatedRoom));
+    }
     // Удалить комнату
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")

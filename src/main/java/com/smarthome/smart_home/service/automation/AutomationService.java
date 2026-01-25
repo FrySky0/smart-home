@@ -11,8 +11,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.smarthome.smart_home.dto.automation.AutomationRuleDTO;
-import com.smarthome.smart_home.dto.automation.AutomationRuleResponseDTO;
+import com.smarthome.smart_home.dto.AutomationRuleValidatable;
+import com.smarthome.smart_home.dto.create.AutomationRuleCreateDTO;
+import com.smarthome.smart_home.dto.response.AutomationRuleResponseDTO;
+import com.smarthome.smart_home.dto.update.patch.AutomationRulePatchDTO;
+import com.smarthome.smart_home.dto.update.put.AutomationRulePutDTO;
 import com.smarthome.smart_home.enums.automation.Action;
 import com.smarthome.smart_home.enums.automation.TriggerEvent;
 import com.smarthome.smart_home.events.SensorUpdatedEvent;
@@ -113,7 +116,7 @@ public class AutomationService {
         return actionedRules;
     }
 
-    public AutomationRuleResponseDTO createRule(AutomationRuleDTO dto) {
+    public AutomationRuleResponseDTO createRule(AutomationRuleCreateDTO dto) {
         log.info("Creating new automation rule with name: {}", dto.getName());
 
         Device device = deviceService.getDeviceByUuid(dto.getDeviceUuid());
@@ -132,7 +135,7 @@ public class AutomationService {
         return automationRuleMapper.toResponseDTO(rule);
     }
 
-    private void validateRuleLogic(AutomationRuleDTO dto, Device device){
+    private void validateRuleLogic(AutomationRuleValidatable dto, Device device){
         if (dto.getTriggerEvent() == null){
             log.error("Cannot create rule - Trigger event must be specified");
             throw new RuntimeException("Trigger event must be specified");
@@ -165,7 +168,7 @@ public class AutomationService {
         }
     }
 
-    public AutomationRuleResponseDTO updateRule(Long id, AutomationRuleDTO dto) {
+    public AutomationRuleResponseDTO updateRule(Long id, AutomationRulePutDTO dto) {
         log.info("Updating automation rule with ID: {}", id);
 
         AutomationRule existingRule = automationRepository.findById(id)
@@ -201,7 +204,7 @@ public class AutomationService {
         return automationRuleMapper.toResponseDTO(existingRule);
     }
 
-    public AutomationRuleResponseDTO partiallyUpdateRule(Long id, AutomationRuleDTO dto) {
+    public AutomationRuleResponseDTO partiallyUpdateRule(Long id, AutomationRulePatchDTO dto) {
         log.info("Partially updating automation rule with ID: {}", id);
 
         AutomationRule existingRule = automationRepository.findById(id)

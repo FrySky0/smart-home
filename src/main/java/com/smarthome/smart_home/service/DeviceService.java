@@ -7,8 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.smarthome.smart_home.dto.DeviceUpdateDTO;
 import com.smarthome.smart_home.dto.create.DeviceCreateDTO;
+import com.smarthome.smart_home.dto.update.patch.DevicePatchDTO;
+import com.smarthome.smart_home.dto.update.put.DevicePutDTO;
 import com.smarthome.smart_home.enums.DeviceStatus;
 import com.smarthome.smart_home.enums.DeviceType;
 import com.smarthome.smart_home.exception.ResourceNotFoundException;
@@ -106,7 +107,7 @@ public class DeviceService {
         return savedDevice;
     }
     @Transactional
-    public Device updateFull(Long id, DeviceUpdateDTO deviceUpdateDTO) {
+    public Device updateFull(Long id, DevicePutDTO deviceUpdateDTO) {
         log.debug("Fully updating device with id: {}", id);
         Device existingDevice = getDeviceById(id);
         Room room = roomService.getRoomById(deviceUpdateDTO.getRoomId());
@@ -128,22 +129,22 @@ public class DeviceService {
         return updatedDevice;
     }
     @Transactional
-    public Device updatePartially(Long id, DeviceUpdateDTO deviceUpdateDTO) {
+    public Device updatePartially(Long id, DevicePatchDTO devicePatchDTO) {
         log.debug("Partially updating device with id: {}", id);
         Device existingDevice = getDeviceById(id);
-        if (deviceUpdateDTO.getName() != null) {
-            existingDevice.setName(deviceUpdateDTO.getName());
+        if (devicePatchDTO.getName() != null) {
+            existingDevice.setName(devicePatchDTO.getName());
         }
-        if (deviceUpdateDTO.getStatus() != null) {
-            existingDevice.setStatus(deviceUpdateDTO.getStatus());
+        if (devicePatchDTO.getStatus() != null) {
+            existingDevice.setStatus(devicePatchDTO.getStatus());
         }
-        if (deviceUpdateDTO.getRoomId() != null) {
-            Room room = roomService.getRoomById(deviceUpdateDTO.getRoomId());
+        if (devicePatchDTO.getRoomId() != null) {
+            Room room = roomService.getRoomById(devicePatchDTO.getRoomId());
             existingDevice.setRoom(room);
         }
-        if (deviceUpdateDTO.getValue() != null) {
+        if (devicePatchDTO.getValue() != null) {
             if (existingDevice.getType().hasValue()){
-                existingDevice.setValue(deviceUpdateDTO.getValue());
+                existingDevice.setValue(devicePatchDTO.getValue());
             } else {
                 log.error("Cannot set value for device type {} which does not support values", existingDevice.getType());
                 throw new ValidationException("Cannot set value for device type " + existingDevice.getType() + " which does not support values");

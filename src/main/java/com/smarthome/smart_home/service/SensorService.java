@@ -8,8 +8,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.smarthome.smart_home.dto.SensorUpdateDTO;
 import com.smarthome.smart_home.dto.create.SensorCreateDTO;
+import com.smarthome.smart_home.dto.update.patch.SensorPatchDTO;
+import com.smarthome.smart_home.dto.update.put.SensorPutDTO;
 import com.smarthome.smart_home.enums.SensorType;
 import com.smarthome.smart_home.events.SensorUpdatedEvent;
 import com.smarthome.smart_home.exception.ResourceNotFoundException;
@@ -71,12 +72,12 @@ public class SensorService {
         return savedSensor;
     }
     @Transactional
-    public Sensor updateFull(Long id, SensorUpdateDTO sensorUpdateDTO){
+    public Sensor updateFull(Long id, SensorPutDTO sensorPutDTO){
         log.debug("Fully updating sensor with id: {}", id);
         Sensor existingSensor = getSensorById(id);
-        Room room = roomService.getRoomById(sensorUpdateDTO.getRoomId());
-        existingSensor.setName(sensorUpdateDTO.getName());
-        existingSensor.setValue(sensorUpdateDTO.getValue());
+        Room room = roomService.getRoomById(sensorPutDTO.getRoomId());
+        existingSensor.setName(sensorPutDTO.getName());
+        existingSensor.setValue(sensorPutDTO.getValue());
         existingSensor.setRoom(room);
         Sensor updatedSensor = sensorRepository.save(existingSensor);
         eventPublisher.publishEvent(new SensorUpdatedEvent(updatedSensor));
@@ -84,18 +85,18 @@ public class SensorService {
         return updatedSensor;
     }
     @Transactional
-    public Sensor updatePartially(Long id, SensorUpdateDTO sensorUpdateDTO){
+    public Sensor updatePartially(Long id, SensorPatchDTO sensorPatchDTO){
         log.debug("Partially updating sensor with id: {}", id);
         Sensor existingSensor = getSensorById(id);
-        if (sensorUpdateDTO.getName()!=null){
-            existingSensor.setName(sensorUpdateDTO.getName());
+        if (sensorPatchDTO.getName()!=null){
+            existingSensor.setName(sensorPatchDTO.getName());
         }
-        if (sensorUpdateDTO.getRoomId()!=null){
-            Room room = roomService.getRoomById(sensorUpdateDTO.getRoomId());
+        if (sensorPatchDTO.getRoomId()!=null){
+            Room room = roomService.getRoomById(sensorPatchDTO.getRoomId());
             existingSensor.setRoom(room);
         }
-        if (sensorUpdateDTO.getValue()!=null){
-            existingSensor.setValue(sensorUpdateDTO.getValue());
+        if (sensorPatchDTO.getValue()!=null){
+            existingSensor.setValue(sensorPatchDTO.getValue());
         }
         Sensor updatedSensor = sensorRepository.save(existingSensor);
         eventPublisher.publishEvent(new SensorUpdatedEvent(updatedSensor));

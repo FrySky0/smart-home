@@ -2,15 +2,15 @@ package com.smarthome.smart_home.mappers;
 
 import org.springframework.stereotype.Component;
 
-import com.smarthome.smart_home.dto.SensorDTO;
 import com.smarthome.smart_home.dto.create.SensorCreateDTO;
+import com.smarthome.smart_home.dto.response.SensorResponseDTO;
 import com.smarthome.smart_home.model.Sensor;
 
 @Component
 public class SensorMapper {
     // Преобразование сущности Sensor в DTO
-    public SensorDTO toDTO(Sensor sensor) {
-        SensorDTO dto = new SensorDTO();
+    public SensorResponseDTO toDTO(Sensor sensor) {
+        SensorResponseDTO dto = new SensorResponseDTO();
         dto.setId(sensor.getId());
         dto.setName(sensor.getName());
         dto.setType(sensor.getType());

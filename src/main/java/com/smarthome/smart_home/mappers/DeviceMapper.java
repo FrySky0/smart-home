@@ -2,15 +2,15 @@ package com.smarthome.smart_home.mappers;
 
 import org.springframework.stereotype.Component;
 
-import com.smarthome.smart_home.dto.DeviceDTO;
 import com.smarthome.smart_home.dto.create.DeviceCreateDTO;
+import com.smarthome.smart_home.dto.response.DeviceResponseDTO;
 import com.smarthome.smart_home.model.Device;
 
 @Component
 public class DeviceMapper {
     // Преобразование сущности Device в DTO
-    public DeviceDTO toDTO(Device device) {
-        DeviceDTO dto = new DeviceDTO();
+    public DeviceResponseDTO toResponseDTO(Device device) {
+        DeviceResponseDTO dto = new DeviceResponseDTO();
         dto.setId(device.getId());
         dto.setName(device.getName());
         dto.setType(device.getType());

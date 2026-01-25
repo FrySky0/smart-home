@@ -20,8 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.smarthome.smart_home.dto.automation.AutomationRuleDTO;
-import com.smarthome.smart_home.dto.automation.AutomationRuleResponseDTO;
+import com.smarthome.smart_home.dto.create.AutomationRuleCreateDTO;
+import com.smarthome.smart_home.dto.response.AutomationRuleResponseDTO;
+import com.smarthome.smart_home.dto.update.patch.AutomationRulePatchDTO;
+import com.smarthome.smart_home.dto.update.put.AutomationRulePutDTO;
 import com.smarthome.smart_home.enums.automation.Action;
 import com.smarthome.smart_home.enums.automation.TriggerEvent;
 import com.smarthome.smart_home.mappers.AutomationRuleMapper;
@@ -87,10 +89,10 @@ public class AutomationController {
     }
     @Operation(summary = "Получить правило автоматизации по ID", description="Возвращает правило автоматизации по его уникальному идентификатору.")
     @GetMapping("/{id}")
-    public ResponseEntity<AutomationRuleDTO> getRuleById(@PathVariable Long id) {
+    public ResponseEntity<AutomationRuleResponseDTO> getRuleById(@PathVariable Long id) {
         log.info("Getting automation rule by ID: {}", id);
         AutomationRule rule = automationService.getRuleById(id);
-        AutomationRuleDTO ruleDTO = automationRuleMapper.toDTO(rule);
+        AutomationRuleResponseDTO ruleDTO = automationRuleMapper.toResponseDTO(rule);
         log.info("Successfully retrieved automation rule with ID: {}", id);
         return ResponseEntity.ok(ruleDTO);
     }
@@ -116,11 +118,11 @@ public class AutomationController {
     @PostMapping
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<AutomationRuleResponseDTO> createAutomationRule(
-            @Valid @RequestBody AutomationRuleDTO automationRuleDTO) {
+            @Valid @RequestBody AutomationRuleCreateDTO automationRuleCreateDTO) {
         log.info("Creating new automation rule");
-        log.debug("Automation rule DTO: {}", automationRuleDTO);
+        log.debug("Automation rule DTO: {}", automationRuleCreateDTO);
 
-        AutomationRuleResponseDTO createdRule = automationService.createRule(automationRuleDTO);
+        AutomationRuleResponseDTO createdRule = automationService.createRule(automationRuleCreateDTO);
 
         log.info("Successfully created automation rule with ID: {}", createdRule.getId());
         log.debug("Created automation rule details: {}", createdRule);
@@ -132,12 +134,12 @@ public class AutomationController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<AutomationRuleResponseDTO> updateRule(
-            @Valid @RequestBody AutomationRuleDTO automationRuleDTO,
+            @Valid @RequestBody AutomationRulePutDTO automationRulePutDTO,
             @PathVariable Long id) {
         log.info("Updating automation rule with ID: {}", id);
-        log.debug("Update DTO for rule {}: {}", id, automationRuleDTO);
+        log.debug("Update DTO for rule {}: {}", id, automationRulePutDTO);
 
-        AutomationRuleResponseDTO updatedRule = automationService.updateRule(id, automationRuleDTO);
+        AutomationRuleResponseDTO updatedRule = automationService.updateRule(id, automationRulePutDTO);
 
         log.info("Successfully updated automation rule with ID: {}", id);
         log.debug("Updated automation rule details: {}", updatedRule);
@@ -148,12 +150,12 @@ public class AutomationController {
     @PatchMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<AutomationRuleResponseDTO> partiallyUpdateRule(
-            @RequestBody AutomationRuleDTO automationRuleDTO,
+            @RequestBody AutomationRulePatchDTO automationRulePatchDTO,
             @PathVariable Long id) {
         log.info("Partially updating automation rule with ID: {}", id);
-        log.debug("Partial update DTO for rule {}: {}", id, automationRuleDTO);
+        log.debug("Partial update DTO for rule {}: {}", id, automationRulePatchDTO);
 
-        AutomationRuleResponseDTO updatedRule = automationService.partiallyUpdateRule(id, automationRuleDTO);
+        AutomationRuleResponseDTO updatedRule = automationService.partiallyUpdateRule(id, automationRulePatchDTO);
 
         log.info("Successfully partially updated automation rule with ID: {}", id);
         log.debug("Partially updated automation rule details: {}", updatedRule);

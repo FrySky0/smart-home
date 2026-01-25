@@ -18,9 +18,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.smarthome.smart_home.dto.SensorDTO;
-import com.smarthome.smart_home.dto.SensorUpdateDTO;
 import com.smarthome.smart_home.dto.create.SensorCreateDTO;
+import com.smarthome.smart_home.dto.response.SensorResponseDTO;
+import com.smarthome.smart_home.dto.update.patch.SensorPatchDTO;
+import com.smarthome.smart_home.dto.update.put.SensorPutDTO;
 import com.smarthome.smart_home.enums.SensorType;
 import com.smarthome.smart_home.mappers.SensorMapper;
 import com.smarthome.smart_home.model.Sensor;
@@ -49,7 +50,7 @@ public class SensorController {
     // Получить все сенсоры, с возможностью фильтрации по комнате и типу
     @Operation(summary = "Получить все сенсоры с возможностью фильтрации", description = "Получить список всех сенсоров с возможностью фильтрации по комнате и типу сенсора.")
     @GetMapping
-    public ResponseEntity<Page<SensorDTO>> getAllSensors(
+    public ResponseEntity<Page<SensorResponseDTO>> getAllSensors(
             @Parameter(description="Поиск по ID комнаты, в которой стоит этот сенсор") @RequestParam(required = false) Long roomId,
             @Parameter(description="Поиск по типу сенсора") @RequestParam(required = false) SensorType type,
             @RequestParam(defaultValue = "0") int page,
@@ -66,7 +67,7 @@ public class SensorController {
                 : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<SensorDTO> sensorPage = sensorService.getSensorsByFilters(roomId, type, pageable)
+        Page<SensorResponseDTO> sensorPage = sensorService.getSensorsByFilters(roomId, type, pageable)
                 .map(sensorMapper::toDTO);
 
         log.info("Successfully retrieved {} sensors on page {} of {}",
@@ -78,7 +79,7 @@ public class SensorController {
     // Получить сенсор по ID
     @Operation(summary = "Получить сенсор по ID", description = "Получить детали сенсора по его уникальному идентификатору.")
     @GetMapping("/{id}")
-    public ResponseEntity<SensorDTO> getSensorById(@PathVariable @NotNull Long id) {
+    public ResponseEntity<SensorResponseDTO> getSensorById(@PathVariable @NotNull Long id) {
         log.info("Getting sensor by ID: {}", id);
 
         Sensor sensor = sensorService.getSensorById(id);
@@ -90,26 +91,26 @@ public class SensorController {
     @Operation(summary = "Создать новый сенсор", description = "Создать новый сенсор с указанными параметрами.")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SensorDTO> createSensor(@Valid @RequestBody SensorCreateDTO createSensorDTO) {
+    public ResponseEntity<SensorResponseDTO> createSensor(@Valid @RequestBody SensorCreateDTO sensorCreateDTO) {
         log.info("Creating new sensor with name: {}, type: {}, roomId: {}, value: {}",
-                createSensorDTO.getName(), createSensorDTO.getType(), createSensorDTO.getRoomId(), createSensorDTO.getValue());
+                sensorCreateDTO.getName(), sensorCreateDTO.getType(), sensorCreateDTO.getRoomId(), sensorCreateDTO.getValue());
 
-        Sensor sensor = sensorService.createSensor(createSensorDTO);
-        SensorDTO savedSensorDTO = sensorMapper.toDTO(sensor);
+        Sensor sensor = sensorService.createSensor(sensorCreateDTO);
+        SensorResponseDTO sensorDTO = sensorMapper.toDTO(sensor);
 
         log.info("Successfully created sensor with ID: {} and UUID: {}", sensor.getId(), sensor.getUuid());
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedSensorDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(sensorDTO);
     }
 
     // Обновить сенсор
     @Operation(summary = "Полностью обновить сенсор", description = "Обновить все поля существующего сенсора по его ID.")
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SensorDTO> updateSensorFull(@PathVariable @NotNull Long id,
-            @Valid @RequestBody SensorUpdateDTO sensorUpdateDTO) {
+    public ResponseEntity<SensorResponseDTO> updateSensorFull(@PathVariable @NotNull Long id,
+            @Valid @RequestBody SensorPutDTO sensorPutDTO) {
         log.info("Fully updating sensor ID: {}", id);
-        Sensor sensor = sensorService.updateFull(id, sensorUpdateDTO);
-        SensorDTO sensorDTO = sensorMapper.toDTO(sensor);
+        Sensor sensor = sensorService.updateFull(id, sensorPutDTO);
+        SensorResponseDTO sensorDTO = sensorMapper.toDTO(sensor);
 
         log.info("The sensor with ID {} has been successfully fully updated", id);
         return ResponseEntity.ok(sensorDTO);
@@ -117,12 +118,12 @@ public class SensorController {
     @Operation(summary = "Частично обновить сенсор", description = "Обновить определённые поля существующего сенсора по его ID.")
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SensorDTO> updateSensorPartially(@PathVariable @NotNull Long id,
-            @Valid @RequestBody @NotNull SensorUpdateDTO sensorUpdateDTO) {
+    public ResponseEntity<SensorResponseDTO> updateSensorPartially(@PathVariable @NotNull Long id,
+            @Valid @RequestBody @NotNull SensorPatchDTO sensorPatchDTO) {
         log.info("Partially updating sensor with ID: {}", id);
 
-        Sensor updatedSensor = sensorService.updatePartially(id, sensorUpdateDTO);
-        SensorDTO updatedSensorDTO = sensorMapper.toDTO(updatedSensor);
+        Sensor updatedSensor = sensorService.updatePartially(id, sensorPatchDTO);
+        SensorResponseDTO updatedSensorDTO = sensorMapper.toDTO(updatedSensor);
 
         log.info("The sensor with ID {} has been successfully partially updated", id);
         return ResponseEntity.ok(updatedSensorDTO);

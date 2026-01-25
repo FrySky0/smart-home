@@ -1,10 +1,11 @@
-package com.smarthome.smart_home.dto.automation;
+package com.smarthome.smart_home.dto.update.patch;
 
 import java.time.LocalTime;
 import java.util.UUID;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.smarthome.smart_home.dto.AutomationRuleValidatable;
 import com.smarthome.smart_home.enums.automation.Action;
 import com.smarthome.smart_home.enums.automation.TriggerEvent;
 
@@ -12,8 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-@Schema(description = "Модель для создания/обновления правила автоматизации")
-public class AutomationRuleDTO {
+public class AutomationRulePatchDTO implements AutomationRuleValidatable {
     @Schema(description = "Название правила автоматизации", example = "Включить свет при движении")
     private String name;
     @Schema(description = "Описание правила автоматизации", example = "Это правило включает свет в комнате при обнаружении движения датчиком.")

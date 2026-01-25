@@ -2,8 +2,8 @@ package com.smarthome.smart_home.mappers;
 
 import org.springframework.stereotype.Component;
 
-import com.smarthome.smart_home.dto.automation.AutomationRuleDTO;
-import com.smarthome.smart_home.dto.automation.AutomationRuleResponseDTO;
+import com.smarthome.smart_home.dto.AutomationRuleValidatable;
+import com.smarthome.smart_home.dto.response.AutomationRuleResponseDTO;
 import com.smarthome.smart_home.model.AutomationRule;
 import com.smarthome.smart_home.model.Device;
 import com.smarthome.smart_home.model.Sensor;
@@ -18,7 +18,7 @@ public class AutomationRuleMapper {
         this.sensorMapper = sensorMapper;
     }
 
-    public AutomationRule toEntity(AutomationRuleDTO dto, Device device, Sensor sensor) {
+    public AutomationRule toEntity(AutomationRuleValidatable dto, Device device, Sensor sensor) {
         AutomationRule rule = new AutomationRule();
         rule.setName(dto.getName());
         rule.setDescription(dto.getDescription());
@@ -38,7 +38,7 @@ public class AutomationRuleMapper {
         dto.setId(rule.getId());
         dto.setName(rule.getName());
         dto.setDescription(rule.getDescription());
-        dto.setTriggerDevice(deviceMapper.toDTO(rule.getDevice()));
+        dto.setTriggerDevice(deviceMapper.toResponseDTO(rule.getDevice()));
         if (rule.getSensor() != null){
             dto.setTriggerSensor(sensorMapper.toDTO(rule.getSensor()));
         }else{
@@ -53,23 +53,23 @@ public class AutomationRuleMapper {
         return dto;
     }
 
-    public AutomationRuleDTO toDTO(AutomationRule rule) {
-        AutomationRuleDTO dto = new AutomationRuleDTO();
-        dto.setName(rule.getName());
-        dto.setDescription(rule.getDescription());
-        dto.setEnabled(rule.isEnabled());
-        dto.setDeviceUuid(rule.getDevice().getUuid());
-        if (rule.getSensor() != null) {
-            dto.setSensorUuid(rule.getSensor().getUuid());
-        } else {
-            dto.setSensorUuid(null);
-        }
-        dto.setTriggerEvent(rule.getTriggerEvent());
-        dto.setTriggerValue(rule.getTriggerValue());
-        dto.setTriggerTime(rule.getTriggerTime());
-        dto.setAction(rule.getAction());
-        dto.setActionValue(rule.getActionValue());
-        return dto;
-    }
+    // public AutomationRuleDTO toDTO(AutomationRule rule) {
+    //     AutomationRuleDTO dto = new AutomationRuleDTO();
+    //     dto.setName(rule.getName());
+    //     dto.setDescription(rule.getDescription());
+    //     dto.setEnabled(rule.isEnabled());
+    //     dto.setDeviceUuid(rule.getDevice().getUuid());
+    //     if (rule.getSensor() != null) {
+    //         dto.setSensorUuid(rule.getSensor().getUuid());
+    //     } else {
+    //         dto.setSensorUuid(null);
+    //     }
+    //     dto.setTriggerEvent(rule.getTriggerEvent());
+    //     dto.setTriggerValue(rule.getTriggerValue());
+    //     dto.setTriggerTime(rule.getTriggerTime());
+    //     dto.setAction(rule.getAction());
+    //     dto.setActionValue(rule.getActionValue());
+    //     return dto;
+    // }
 
 }
