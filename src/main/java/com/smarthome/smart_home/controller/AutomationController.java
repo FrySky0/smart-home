@@ -1,6 +1,23 @@
 package com.smarthome.smart_home.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.smarthome.smart_home.dto.automation.AutomationRuleDTO;
@@ -14,25 +31,8 @@ import com.smarthome.smart_home.service.automation.AutomationService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-
 @RestController
-@RequestMapping("/api/automation")
+@RequestMapping("/api/automations")
 @Slf4j
 public class AutomationController {
     private final AutomationService automationService;
@@ -48,7 +48,7 @@ public class AutomationController {
     public ResponseEntity<Page<AutomationRuleResponseDTO>> getAllRules(
             @RequestParam(required = false) Boolean enabled,
             @RequestParam(required = false) TriggerEvent triggerEvent,
-            @RequestParam(required = false) Integer triggerValue,
+            @RequestParam(required = false) Double triggerValue,
             @RequestParam(required = false) Long triggerDeviceId,
             @RequestParam(required = false) Long triggerSensorId,
             @RequestParam(required = false) Action action,
@@ -75,8 +75,17 @@ public class AutomationController {
                 rulesPage.getTotalElements());
         return ResponseEntity.ok(rulesPage);
     }
-
+    @GetMapping("/{id}")
+    public ResponseEntity<AutomationRuleDTO> getRuleById(@PathVariable Long id) {
+        log.info("Getting automation rule by ID: {}", id);
+        AutomationRule rule = automationService.getRuleById(id);
+        AutomationRuleDTO ruleDTO = automationRuleMapper.toDTO(rule);
+        log.info("Successfully retrieved automation rule with ID: {}", id);
+        return ResponseEntity.ok(ruleDTO);
+    }
+    
     @GetMapping("/triggerAll")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<List<AutomationRuleResponseDTO>> triggerAllRules() {
         log.info("Triggering all automation rules");
         List<AutomationRule> triggeredRules = automationService.triggerAll();
@@ -90,6 +99,7 @@ public class AutomationController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<AutomationRuleResponseDTO> createAutomationRule(
             @Valid @RequestBody AutomationRuleDTO automationRuleDTO) {
         log.info("Creating new automation rule");
@@ -104,6 +114,7 @@ public class AutomationController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<AutomationRuleResponseDTO> updateRule(
             @Valid @RequestBody AutomationRuleDTO automationRuleDTO,
             @PathVariable Long id) {
@@ -119,6 +130,7 @@ public class AutomationController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<AutomationRuleResponseDTO> partiallyUpdateRule(
             @RequestBody AutomationRuleDTO automationRuleDTO,
             @PathVariable Long id) {
@@ -134,6 +146,7 @@ public class AutomationController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<Void> deleteAutomationRule(@PathVariable Long id) {
         log.info("Deleting automation rule with ID: {}", id);
 

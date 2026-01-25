@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -77,14 +78,13 @@ public class SensorController {
         log.info("Getting sensor by ID: {}", id);
 
         Sensor sensor = sensorService.getSensorById(id);
-        SensorDTO sensorDTO = sensorMapper.toDTO(sensor);
-
-        log.info("Successfully retrieved sensor with ID: {}", id);
-        return ResponseEntity.ok(sensorDTO);
+        log.info("Sensor found with ID: {}", id);
+        return ResponseEntity.ok(sensorMapper.toDTO(sensor));
     }
 
     // Создать новый сенсор
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SensorDTO> createSensor(@Valid @RequestBody CreateSensorDTO createSensorDTO) {
         log.info("Creating new sensor with name: {}, type: {}, roomId: {}, value: {}",
                 createSensorDTO.getName(), createSensorDTO.getType(), createSensorDTO.getRoomId(), createSensorDTO.getValue());
@@ -97,7 +97,9 @@ public class SensorController {
     }
 
     // Обновить сенсор
+    
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SensorDTO> updateSensorFull(@PathVariable @NotNull Long id,
             @Valid @RequestBody SensorUpdateDTO sensorUpdateDTO) {
         log.info("Fully updating sensor ID: {}", id);
@@ -109,8 +111,9 @@ public class SensorController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SensorDTO> updateSensorPartially(@PathVariable @NotNull Long id,
-            @RequestParam @NotNull SensorUpdateDTO sensorUpdateDTO) {
+            @Valid @RequestBody @NotNull SensorUpdateDTO sensorUpdateDTO) {
         log.info("Partially updating sensor with ID: {}", id);
 
         Sensor updatedSensor = sensorService.updatePartially(id, sensorUpdateDTO);
@@ -122,6 +125,7 @@ public class SensorController {
 
     // Удалить сенсор
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteSensor(@PathVariable @NotNull Long id) {
         log.info("Deleting sensor with ID: {}", id);
 

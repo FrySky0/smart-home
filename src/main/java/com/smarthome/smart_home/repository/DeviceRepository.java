@@ -25,16 +25,7 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
     List<Device> findByType(DeviceType type);
 
     List<Device> findByStatus(DeviceStatus status);
-
-    @Query("SELECT d FROM Device d WHERE " +
-            "(:roomId IS NULL OR d.room.id = :roomId) AND " +
-            "(:type IS NULL OR d.type = :type) AND " +
-            "(:status IS NULL OR d.status = :status)")
-    List<Device> findByFilters(
-            @Param("roomId") Long roomId,
-            @Param("type") DeviceType type,
-            @Param("status") DeviceStatus status);
-
+    
     @Query("SELECT d FROM Device d WHERE " +
             "(:roomId IS NULL OR d.room.id = :roomId) AND " +
             "(:type IS NULL OR d.type = :type) AND " +

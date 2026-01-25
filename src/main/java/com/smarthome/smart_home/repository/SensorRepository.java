@@ -26,13 +26,6 @@ public interface SensorRepository extends JpaRepository<Sensor, Long> {
     @Query("SELECT s FROM Sensor s WHERE " +
             "(:roomId IS NULL OR s.room.id = :roomId) AND " +
             "(:type IS NULL OR s.type = :type)")
-    List<Sensor> findByFilters(
-            @Param("roomId") Long roomId,
-            @Param("type") SensorType type);
-
-    @Query("SELECT s FROM Sensor s WHERE " +
-            "(:roomId IS NULL OR s.room.id = :roomId) AND " +
-            "(:type IS NULL OR s.type = :type)")
     Page<Sensor> findByFilters(
             @Param("roomId") Long roomId,
             @Param("type") SensorType type,

@@ -1,19 +1,28 @@
 package com.smarthome.smart_home.controller;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.smarthome.smart_home.dto.AuthRequestDTO;
 import com.smarthome.smart_home.dto.AuthResponseDTO;
+import com.smarthome.smart_home.model.User;
 import com.smarthome.smart_home.service.JwtService;
 import com.smarthome.smart_home.service.UserService;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -81,8 +90,16 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<Map<String, String>> getCurrentUser() {
-        return ResponseEntity.ok(Map.of("message", "You are authenticated"));
+    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            log.warn("No authenticated user found");
+            return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
+        }
+        return ResponseEntity.ok(Map.of(
+            "username", user.getUsername(),
+            "email", user.getEmail(),
+            "roles", user.getRoles().stream().map(Enum::name).collect(Collectors.toList())
+        ));
     }
 
     private void setAuthCookie(HttpServletResponse response, String token) {

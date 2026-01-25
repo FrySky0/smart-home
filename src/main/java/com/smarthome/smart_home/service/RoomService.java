@@ -1,10 +1,9 @@
 package com.smarthome.smart_home.service;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.smarthome.smart_home.exception.ResourceNotFoundException;
 import com.smarthome.smart_home.model.Room;
@@ -20,18 +19,15 @@ import lombok.extern.slf4j.Slf4j;
 public class RoomService {
     private final RoomRepository roomRepository;
 
-    public List<Room> getAllRooms() {
-        log.info("Fetching all rooms");
-        List<Room> rooms = roomRepository.findAll();
-        log.debug("Retrieved {} rooms", rooms.size());
-        return rooms;
-    }
-
-    public Page<Room> getAllRooms(Pageable pageable) {
-        log.info("Fetching all rooms with pagination - page: {}, size: {}", pageable.getPageNumber(),
-                pageable.getPageSize());
-        Page<Room> rooms = roomRepository.findAll(pageable);
-        log.debug("Retrieved {} rooms out of {} total", rooms.getNumberOfElements(), rooms.getTotalElements());
+    public Page<Room> getRoomsByFilters(Integer floor, String name, Pageable pageable) {
+        log.debug("Fetching rooms with filters - floor: {}, name: {}, pageable: {}",
+                floor,name, pageable);
+        String searchName = null;
+        if (name != null && !name.isBlank()) {
+            searchName = "%" + name.toLowerCase() + "%";
+        }
+        Page<Room> rooms = roomRepository.findByFilters(floor, searchName, pageable);
+        log.info("Successfully fetched {} rooms with applied filters", rooms.getTotalElements());
         return rooms;
     }
 
@@ -46,17 +42,6 @@ public class RoomService {
         return room;
     }
 
-    public List<Room> getRoomsByFloor(Integer floor) {
-        log.info("Fetching rooms by floor: {}", floor);
-        if (floor == null || floor < 0) {
-            log.warn("Invalid floor value provided: {}", floor);
-            throw new ValidationException("Floor must be a positive number");
-        }
-        List<Room> rooms = roomRepository.findByFloor(floor);
-        log.debug("Retrieved {} rooms on floor {}", rooms.size(), floor);
-        return rooms;
-    }
-
     public Page<Room> getRoomsByFloor(Integer floor, Pageable pageable) {
         log.info("Fetching rooms by floor: {} with pagination - page: {}, size: {}", floor, pageable.getPageNumber(),
                 pageable.getPageSize());
@@ -69,31 +54,7 @@ public class RoomService {
                 rooms.getTotalElements());
         return rooms;
     }
-
-    public List<Room> findRoomsByName(String name) {
-        log.info("Searching rooms by name: '{}'", name);
-        if (name == null || name.isEmpty()) {
-            log.warn("Empty room name provided for search");
-            throw new ValidationException("Room name is required");
-        }
-        List<Room> rooms = roomRepository.findByNameContainingIgnoreCase(name);
-        log.debug("Found {} rooms matching name '{}'", rooms.size(), name);
-        return rooms;
-    }
-
-    public Page<Room> findRoomsByName(String name, Pageable pageable) {
-        log.info("Searching rooms by name: '{}' with pagination - page: {}, size: {}", name, pageable.getPageNumber(),
-                pageable.getPageSize());
-        if (name == null || name.isEmpty()) {
-            log.warn("Empty room name provided for search");
-            throw new ValidationException("Room name is required");
-        }
-        Page<Room> rooms = roomRepository.findByNameContainingIgnoreCase(name, pageable);
-        log.debug("Found {} rooms matching name '{}' out of {} total", rooms.getNumberOfElements(), name,
-                rooms.getTotalElements());
-        return rooms;
-    }
-
+    @Transactional
     public Room createRoom(Room room) {
         log.info("Creating new room: {}", room.getName());
         if (room.getName() == null || room.getName().isEmpty()) {
@@ -108,7 +69,7 @@ public class RoomService {
         log.info("Successfully created room: {} (id: {})", savedRoom.getName(), savedRoom.getId());
         return savedRoom;
     }
-
+    @Transactional
     public Room updateRoom(Long id, Room roomDetails) {
         log.info("Updating room with id: {}", id);
         Room existingRoom = getRoomById(id);
@@ -132,7 +93,7 @@ public class RoomService {
         log.info("Successfully updated room: {} (id: {})", updatedRoom.getName(), updatedRoom.getId());
         return updatedRoom;
     }
-
+    @Transactional
     public void deleteRoom(Long id) {
         log.info("Deleting room with id: {}", id);
         if (!roomRepository.existsById(id)) {

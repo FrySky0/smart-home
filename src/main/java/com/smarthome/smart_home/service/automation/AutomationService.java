@@ -43,30 +43,10 @@ public class AutomationService {
         return rules;
     }
 
-    public List<AutomationRule> getRulesByFilters(
-            Boolean enabled,
-            TriggerEvent triggerEvent,
-            Integer triggerValue,
-            Long triggerDeviceId,
-            Long triggerSensorId,
-            Action action,
-            Double actionValue) {
-        log.debug(
-                "Fetching automation rules with filters - enabled: {}, triggerEvent: {}, triggerValue: {}, triggerDeviceId: {}, triggerSensorId: {}, action: {}, actionValue: {}",
-                enabled, triggerEvent, triggerValue, triggerDeviceId, triggerSensorId, action, actionValue);
-
-        List<AutomationRule> rules = automationRepository.findByFilters(enabled, triggerEvent, triggerValue,
-                triggerDeviceId, triggerSensorId,
-                action, actionValue);
-
-        log.info("Retrieved {} automation rules matching the specified filters", rules.size());
-        return rules;
-    }
-
     public Page<AutomationRule> getRulesByFilters(
             Boolean enabled,
             TriggerEvent triggerEvent,
-            Integer triggerValue,
+            Double triggerValue,
             Long triggerDeviceId,
             Long triggerSensorId,
             Action action,
@@ -83,6 +63,17 @@ public class AutomationService {
         log.info("Retrieved {} automation rules (page {}/{} with {} total elements) matching the specified filters",
                 rules.getNumberOfElements(), rules.getNumber(), rules.getTotalPages(), rules.getTotalElements());
         return rules;
+    }
+
+    public AutomationRule getRuleById(Long id) {
+        log.info("Fetching automation rule by ID: {}", id);
+        AutomationRule rule = automationRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Automation rule not found with ID: {}", id);
+                    return new RuntimeException("Automation rule not found with id: " + id);
+                });
+        log.debug("Successfully retrieved automation rule: {} (ID: {})", rule.getName(), rule.getId());
+        return rule;
     }
 
     // Затриггерить все правила

@@ -1,11 +1,11 @@
 package com.smarthome.smart_home.service;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.smarthome.smart_home.dto.CreateDeviceDTO;
 import com.smarthome.smart_home.dto.DeviceUpdateDTO;
@@ -29,13 +29,6 @@ public class DeviceService {
     private final DeviceRepository deviceRepository;
     private final DeviceMapper deviceMapper;
     private final RoomService roomService;
-
-    public List<Device> getAllDevices() {
-        log.debug("Fetching all devices");
-        List<Device> devices = deviceRepository.findAll();
-        log.info("Successfully fetched {} devices", devices.size());
-        return devices;
-    }
 
     public Page<Device> getDevicesByFilters(Long roomId, DeviceType type, DeviceStatus status, Pageable pageable) {
         log.debug("Fetching devices with filters - roomId: {}, type: {}, status: {}, pageable: {}",
@@ -80,7 +73,7 @@ public class DeviceService {
         log.info("Successfully turned on device with id: {}", device.getId());
         return savedDevice;
     }
-
+    @Transactional
     public Device createDevice(CreateDeviceDTO createDeviceDTO) {
         log.debug("Creating new device '{}' for room ID: {}",createDeviceDTO.getName(), createDeviceDTO.getRoomId());
         Device device = new Device();
@@ -112,7 +105,7 @@ public class DeviceService {
                 savedDevice.getId(), savedDevice.getName(), room.getName());
         return savedDevice;
     }
-
+    @Transactional
     public Device updateFull(Long id, DeviceUpdateDTO deviceUpdateDTO) {
         log.debug("Fully updating device with id: {}", id);
         Device existingDevice = getDeviceById(id);
@@ -134,7 +127,7 @@ public class DeviceService {
         log.info("Successfully fully updated device with id: {}", id);
         return updatedDevice;
     }
-
+    @Transactional
     public Device updatePartially(Long id, DeviceUpdateDTO deviceUpdateDTO) {
         log.debug("Partially updating device with id: {}", id);
         Device existingDevice = getDeviceById(id);
@@ -160,7 +153,7 @@ public class DeviceService {
         log.info("Successfully partially updated device with id: {}", id);
         return updatedDevice;
     }
-
+    @Transactional
     public void deleteDevice(Long id) {
         log.debug("Deleting device with id: {}", id);
         if (!deviceRepository.existsById(id)) {
@@ -177,44 +170,5 @@ public class DeviceService {
         Device savedDevice = deviceRepository.save(device);
         log.info("Successfully set value for device id: {} to {}", device.getId(), value);
         return savedDevice;
-    }
-
-    public List<Device> getDevicesByRoomId(Long id) {
-        log.debug("Fetching devices by room id: {}", id);
-        List<Device> devices = deviceRepository.findByRoomId(id);
-        log.info("Successfully fetched {} devices for room id: {}", devices.size(), id);
-        return devices;
-    }
-
-    public List<Device> getDevicesByType(DeviceType type) {
-        log.debug("Fetching devices by type: {}", type);
-        List<Device> devices = deviceRepository.findByType(type);
-        log.info("Successfully fetched {} devices of type: {}", devices.size(), type);
-        return devices;
-    }
-
-    public List<Device> getDevicesByStatus(DeviceStatus status) {
-        log.debug("Fetching devices by status: {}", status);
-        List<Device> devices = deviceRepository.findByStatus(status);
-        log.info("Successfully fetched {} devices with status: {}", devices.size(), status);
-        return devices;
-    }
-
-    public List<Device> getDevicesByFilters(Long roomId, DeviceType type, DeviceStatus status) {
-        log.debug("Fetching devices with filters - roomId: {}, type: {}, status: {}", roomId, type, status);
-        List<Device> devices = deviceRepository.findByFilters(roomId, type, status);
-        log.info("Successfully fetched {} devices with applied filters", devices.size());
-        return devices;
-    }
-
-    public List<Device> getDevicesByRoomName(String roomName) {
-        log.debug("Fetching devices by room name: {}", roomName);
-        if (roomName == null || roomName.isEmpty()) {
-            log.error("Room name is required but was: {}", roomName);
-            throw new ValidationException("Room name is required");
-        }
-        List<Device> devices = deviceRepository.findByRoomName(roomName);
-        log.info("Successfully fetched {} devices for room name: {}", devices.size(), roomName);
-        return devices;
     }
 }

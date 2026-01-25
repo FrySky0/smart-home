@@ -1,19 +1,18 @@
 package com.smarthome.smart_home.service;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.smarthome.smart_home.dto.CreateSensorDTO;
 import com.smarthome.smart_home.dto.SensorUpdateDTO;
 import com.smarthome.smart_home.enums.SensorType;
 import com.smarthome.smart_home.events.SensorUpdatedEvent;
 import com.smarthome.smart_home.exception.ResourceNotFoundException;
-import com.smarthome.smart_home.exception.ValidationException;
 import com.smarthome.smart_home.model.Room;
 import com.smarthome.smart_home.model.Sensor;
 import com.smarthome.smart_home.repository.SensorRepository;
@@ -29,13 +28,6 @@ public class SensorService {
     private final RoomService roomService;
     // private final AutomationService automationService;
     private final ApplicationEventPublisher eventPublisher;
-
-    public List<Sensor> getAllSensors() {
-        log.debug("Retrieving all sensors");
-        List<Sensor> sensors = sensorRepository.findAll();
-        log.info("Successfully retrieved {} sensors", sensors.size());
-        return sensors;
-    }
 
     public Sensor getSensorById(Long id) {
         log.debug("Looking for sensor with ID: {}", id);
@@ -59,6 +51,7 @@ public class SensorService {
         return sensor;
     }
 
+    @Transactional
     public Sensor createSensor(CreateSensorDTO createSensorDTO) {
         log.debug("Creating new sensor '{}' for room ID: {}", createSensorDTO.getName(), createSensorDTO.getRoomId());
         Sensor sensor = new Sensor();
@@ -77,7 +70,7 @@ public class SensorService {
                 savedSensor.getId(), savedSensor.getName(), room.getName());
         return savedSensor;
     }
-
+    @Transactional
     public Sensor updateFull(Long id, SensorUpdateDTO sensorUpdateDTO){
         log.debug("Fully updating sensor with id: {}", id);
         Sensor existingSensor = getSensorById(id);
@@ -86,10 +79,11 @@ public class SensorService {
         existingSensor.setValue(sensorUpdateDTO.getValue());
         existingSensor.setRoom(room);
         Sensor updatedSensor = sensorRepository.save(existingSensor);
+        eventPublisher.publishEvent(new SensorUpdatedEvent(updatedSensor));
         log.debug("Successfully fully updated sensor with id: {}", id);
         return updatedSensor;
     }
-
+    @Transactional
     public Sensor updatePartially(Long id, SensorUpdateDTO sensorUpdateDTO){
         log.debug("Partially updating sensor with id: {}", id);
         Sensor existingSensor = getSensorById(id);
@@ -104,9 +98,10 @@ public class SensorService {
             existingSensor.setValue(sensorUpdateDTO.getValue());
         }
         Sensor updatedSensor = sensorRepository.save(existingSensor);
+        eventPublisher.publishEvent(new SensorUpdatedEvent(updatedSensor));
         return updatedSensor;
     }
-
+    @Transactional
     public void deleteSensor(Long id) {
         log.debug("Attempting to delete sensor with ID: {}", id);
         if (!sensorRepository.existsById(id)) {
@@ -117,28 +112,6 @@ public class SensorService {
         log.info("Successfully deleted sensor with ID: {}", id);
     }
 
-    public List<Sensor> getSensorsByRoomId(Long roomId) {
-        log.debug("Retrieving sensors for room ID: {}", roomId);
-        List<Sensor> sensors = sensorRepository.findByRoomId(roomId);
-        log.info("Found {} sensors for room ID: {}", sensors.size(), roomId);
-        return sensors;
-    }
-
-    public List<Sensor> getSensorsByType(SensorType type) {
-        log.debug("Retrieving sensors of type: {}", type);
-        List<Sensor> sensors = sensorRepository.findByType(type);
-        log.info("Found {} sensors of type: {}", sensors.size(), type);
-        return sensors;
-    }
-
-    public List<Sensor> getSensorsByFilters(Long roomId, SensorType type) {
-        log.debug("Filtering sensors - Room ID: {}, Type: {}", roomId, type);
-        List<Sensor> sensors = sensorRepository.findByFilters(roomId, type);
-        log.info("Found {} sensors matching filters - Room ID: {}, Type: {}",
-                sensors.size(), roomId, type);
-        return sensors;
-    }
-
     public Page<Sensor> getSensorsByFilters(Long roomId, SensorType type, Pageable pageable) {
         log.debug("Filtering sensors with pagination - Room ID: {}, Type: {}, Pageable: {}",
                 roomId, type, pageable);
@@ -146,16 +119,5 @@ public class SensorService {
         log.info("Found {} sensors on page {} with filters - Room ID: {}, Type: {}",
                 sensorPage.getNumberOfElements(), sensorPage.getNumber(), roomId, type);
         return sensorPage;
-    }
-
-    public List<Sensor> getSensorsByFloor(Integer floor) {
-        log.debug("Retrieving sensors for floor: {}", floor);
-        if (floor == null || floor < 0) {
-            log.error("Invalid floor value: {}", floor);
-            throw new ValidationException("Floor must be a positive number");
-        }
-        List<Sensor> sensors = sensorRepository.findByFloor(floor);
-        log.info("Found {} sensors on floor {}", sensors.size(), floor);
-        return sensors;
     }
 }

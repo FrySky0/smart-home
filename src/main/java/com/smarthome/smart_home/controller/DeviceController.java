@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -77,14 +78,13 @@ public class DeviceController {
         log.info("Getting device by ID: {}", id);
 
         Device device = deviceService.getDeviceById(id);
-        DeviceDTO deviceDTO = deviceMapper.toDTO(device);
-
-        log.info("Successfully retrieved device with ID: {}", id);
-        return ResponseEntity.ok(deviceDTO);
+        log.info("Device found with ID: {}", id);
+        return ResponseEntity.ok(deviceMapper.toDTO(device));
     }
 
     // Создать новое устройство
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DeviceDTO> createDevice(@Valid @RequestBody CreateDeviceDTO createDeviceDTO) {
         log.info("Creating new device with name: {}, type: {}, roomId: {}",
                 createDeviceDTO.getName(), createDeviceDTO.getType(), createDeviceDTO.getRoomId());
@@ -97,6 +97,7 @@ public class DeviceController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<DeviceDTO> updateDeviceFull(@PathVariable @NotNull Long id, @Valid @RequestBody DeviceUpdateDTO deviceUpdateDTO) {
         log.info("Fully updating device with ID: {}", id);
 
@@ -107,6 +108,7 @@ public class DeviceController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<DeviceDTO> updateDevicePartially(@PathVariable @NotNull Long id,
             @Valid @RequestBody @NotNull DeviceUpdateDTO deviceUpdateDTO) {
         log.info("Partially updating device with ID: {}", id);
@@ -119,6 +121,7 @@ public class DeviceController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<Void> deleteDevice(@PathVariable @NotNull Long id) {
         log.info("Deleting device with ID: {}", id);
 

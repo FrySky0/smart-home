@@ -41,8 +41,8 @@ public class FileService {
                 Room room = new Room();
                 room.setName(roomDto.getName());
                 room.setFloor(roomDto.getFloor());
-                Room savedRoom = roomRepository.save(room);
-                log.debug("Imported room: {}", savedRoom.getName());
+                // Room savedRoom = roomRepository.save(room);
+                log.debug("Imported room: {}", room.getName());
 
                 if (roomDto.getDevices() != null){
                     for (var deviceDto : roomDto.getDevices()){
@@ -51,8 +51,8 @@ public class FileService {
                         device.setUuid(deviceDto.getUuid());
                         device.setType(DeviceType.valueOf(deviceDto.getType()));
                         device.setStatus(DeviceStatus.OFF);
-                        device.setRoom(savedRoom);
-                        savedRoom.getDevices().add(device);
+                        device.setRoom(room);
+                        room.getDevices().add(device);
                     }
                 }
                 if (roomDto.getSensors() != null){
@@ -62,12 +62,12 @@ public class FileService {
                         sensor.setUuid(sensorDto.getUuid());
                         sensor.setType(SensorType.valueOf(sensorDto.getType()));
                         sensor.setValue(0.0);
-                        sensor.setRoom(savedRoom);
-                        savedRoom.getSensors().add(sensor);
+                        sensor.setRoom(room);
+                        room.getSensors().add(sensor);
                     }
                 }
                 
-                roomRepository.save(savedRoom);
+                roomRepository.save(room);
             }
         } catch (IOException e) {
             log.error("Failed to read import file", e);
