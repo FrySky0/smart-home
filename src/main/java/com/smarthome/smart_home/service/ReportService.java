@@ -19,6 +19,7 @@ import org.openpdf.text.pdf.PdfWriter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.smarthome.smart_home.enums.automation.TriggerEvent;
 import com.smarthome.smart_home.model.ActivityLog;
@@ -28,6 +29,7 @@ import com.smarthome.smart_home.model.Room;
 import com.smarthome.smart_home.model.Sensor;
 import com.smarthome.smart_home.repository.ActivityLogRepository;
 import com.smarthome.smart_home.repository.RoomRepository;
+
 
 import java.awt.Color;
 
@@ -43,7 +45,7 @@ public class ReportService {
     private final ActivityLogRepository logRepository;
     private final RoomRepository roomRepository;
     private final AutomationRepository automationRepository;
-
+    @Transactional(readOnly=true)
     public byte[] generateActivityReportPDF() {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Document document = new Document(PageSize.A4);
