@@ -17,7 +17,6 @@ import com.smarthome.smart_home.model.AutomationRule;
 
 @Repository
 public interface AutomationRepository extends JpaRepository<AutomationRule, Long> {
-        // List<AutomationRule> findAllRules();
         List<AutomationRule> findByEnabledAndSensorId(boolean enabled, Long triggeredSensorId);
 
         List<AutomationRule> findByEnabled(boolean enabled);
@@ -29,8 +28,8 @@ public interface AutomationRepository extends JpaRepository<AutomationRule, Long
            "(cast(:description as text) IS NULL OR LOWER(r.description) LIKE :description) AND " +
            "(:enabled IS NULL OR r.enabled = :enabled) AND " +
            "(cast(:triggerEvent as text) IS NULL OR r.triggerEvent = :triggerEvent) AND " +
-           "(:triggerValue IS NULL OR r.triggerValue = :triggerValue) AND " + // Поменял местами
-           "(cast(:triggerTime as text) IS NULL OR r.triggerTime = :triggerTime) AND " + // Поменял местами
+           "(:triggerValue IS NULL OR r.triggerValue = :triggerValue) AND " + 
+           "(cast(:triggerTime as text) IS NULL OR r.triggerTime = :triggerTime) AND " + 
            "(cast(:deviceUuid as text) IS NULL OR d.uuid = :deviceUuid) AND " +
            "(cast(:sensorUuid as text) IS NULL OR s.uuid = :sensorUuid) AND " +
            "(cast(:action as text) IS NULL OR r.action = :action) AND " +

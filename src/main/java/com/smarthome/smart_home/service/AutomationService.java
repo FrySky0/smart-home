@@ -19,6 +19,7 @@ import com.smarthome.smart_home.dto.update.put.AutomationRulePutDTO;
 import com.smarthome.smart_home.enums.automation.Action;
 import com.smarthome.smart_home.enums.automation.TriggerEvent;
 import com.smarthome.smart_home.events.SensorUpdatedEvent;
+import com.smarthome.smart_home.exception.ValidationException;
 import com.smarthome.smart_home.mappers.AutomationRuleMapper;
 import com.smarthome.smart_home.model.AutomationRule;
 import com.smarthome.smart_home.model.Device;
@@ -34,7 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class AutomationService {
-    // private final SensorService sensorService;
     private final DeviceService deviceService;
     private final SensorService sensorService;
     private final AutomationRepository automationRepository;
@@ -93,28 +93,6 @@ public class AutomationService {
         return rule;
     }
 
-    // Затриггерить все правила
-    public List<AutomationRule> triggerAll() {
-        log.info("Triggering all enabled automation rules");
-        List<AutomationRule> rules = automationRepository.findByEnabled(true);
-        List<AutomationRule> actionedRules = new ArrayList<>();
-
-        log.debug("Found {} enabled rules to process", rules.size());
-
-        for (AutomationRule rule : rules) {
-            if (checkCondition(rule, rule.getSensor())) {
-                log.debug("Rule '{}' condition met, executing action", rule.getName());
-                goAction(rule);
-                actionedRules.add(rule);
-            } else {
-                log.debug("Rule '{}' condition not met", rule.getName());
-            }
-        }
-
-        log.info("Executed actions for {} automation rules", actionedRules.size());
-        return actionedRules;
-    }
-
     public AutomationRuleResponseDTO createRule(AutomationRuleCreateDTO dto) {
         log.info("Creating new automation rule with name: {}", dto.getName());
 
@@ -137,32 +115,32 @@ public class AutomationService {
     private void validateRuleLogic(AutomationRuleValidatable dto, Device device){
         if (dto.getTriggerEvent() == null){
             log.error("Cannot create rule - Trigger event must be specified");
-            throw new RuntimeException("Trigger event must be specified");
+            throw new ValidationException("Trigger event must be specified");
         }
         if (dto.getTriggerEvent() == TriggerEvent.TIME){
             if (dto.getTriggerTime() == null){
                 log.error("Cannot create rule - TIME trigger event requires a trigger time");
-                throw new RuntimeException("TIME trigger event requires a trigger time");
+                throw new ValidationException("TIME trigger event requires a trigger time");
             }
         }
         else {
             if (dto.getSensorUuid() == null){
                 log.error("Cannot create rule - Non-TIME trigger event requires a sensor UUID");
-                throw new RuntimeException("Non-TIME trigger event requires a sensor UUID");
+                throw new ValidationException("Non-TIME trigger event requires a sensor UUID");
             }
             if (dto.getTriggerValue() == null){
                 log.error("Cannot create rule - Non-TIME trigger event requires a trigger value");
-                throw new RuntimeException("Non-TIME trigger event requires a trigger value");
+                throw new ValidationException("Non-TIME trigger event requires a trigger value");
             }
         }
         if (dto.getAction() == Action.SET_VALUE){
             if (dto.getActionValue() == null){
                 log.error("Cannot create rule - SET_VALUE action requires an action value");
-                throw new RuntimeException("SET_VALUE action requires an action value");
+                throw new ValidationException("SET_VALUE action requires an action value");
             }
             if (!device.getType().hasValue()){
                 log.error("Cannot create rule - Device type {} does not support action values", device.getType());
-                throw new RuntimeException("Device type " + device.getType() + " does not support action values");
+                throw new ValidationException("Device type " + device.getType() + " does not support action values");
             }
         }
     }

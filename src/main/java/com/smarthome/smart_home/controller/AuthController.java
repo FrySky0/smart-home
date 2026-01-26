@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.smarthome.smart_home.dto.auth.AuthRequestDTO;
 import com.smarthome.smart_home.dto.auth.AuthResponseDTO;
+import com.smarthome.smart_home.dto.auth.PasswordChangeRequestDTO;
 import com.smarthome.smart_home.enums.activitylog.ComponentName;
 import com.smarthome.smart_home.enums.activitylog.LogAction;
 import com.smarthome.smart_home.model.User;
@@ -115,6 +116,24 @@ public class AuthController {
             "email", user.getEmail(),
             "roles", user.getRoles().stream().map(Enum::name).collect(Collectors.toList())
         ));
+    }
+
+    @Operation(summary = "Смена пароля", description = "Позволяет текущему пользователю сменить свой пароль.")
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            @Valid @RequestBody PasswordChangeRequestDTO request,
+            @AuthenticationPrincipal User user) {
+        
+        if (user == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
+        }
+
+        userService.changePassword(user, request);
+        
+        logService.log(ComponentName.Auth, LogAction.UPDATED, "Password changed for user: " + user.getUsername());
+        telegramService.sendLog("User '" + user.getUsername() + "' changed their password.");
+
+        return ResponseEntity.ok(Map.of("message", "Пароль успешно изменен"));
     }
 
     private void setAuthCookie(HttpServletResponse response, String token) {

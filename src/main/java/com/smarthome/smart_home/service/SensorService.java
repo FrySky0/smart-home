@@ -27,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 public class SensorService {
     private final SensorRepository sensorRepository;
     private final RoomService roomService;
-    // private final AutomationService automationService;
     private final ApplicationEventPublisher eventPublisher;
 
     public Sensor getSensorById(Long id) {

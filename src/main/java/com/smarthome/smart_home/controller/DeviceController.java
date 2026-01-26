@@ -59,6 +59,7 @@ public class DeviceController {
     // Получить все устройства, с возможностью фильтрации по комнате, типу и статусу
     @Operation(summary = "Получить все устройства с возможностью фильтрации", description = "Получить список всех устройств с возможностью фильтрации по имени, комнате, типу и статусу устройства.")
     @GetMapping
+    @PreAuthorize("hasAuthority('device:read')")
     public ResponseEntity<Page<DeviceResponseDTO>> getAllDevices(
             @Parameter(description="Поиск по названию (частичное совпадение)") @RequestParam(required = false) String name,
             @Parameter(description="Поиск по ID комнаты, в которой стоит этот девайс") @RequestParam(required = false) Long roomId,
@@ -88,6 +89,7 @@ public class DeviceController {
     // Получить устройство по ID
     @Operation(summary = "Получить устройство по ID", description = "Получить детали устройства по его уникальному идентификатору.")
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('device:read')")
     public ResponseEntity<DeviceResponseDTO> getDeviceById(@PathVariable @NotNull Long id) {
         log.info("Getting device by ID: {}", id);
 
@@ -99,7 +101,7 @@ public class DeviceController {
     // Создать новое устройство
     @Operation(summary = "Создать новое устройство", description = "Создать новое устройство с указанными параметрами.")
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('device:manage')")
     public ResponseEntity<DeviceResponseDTO> createDevice(@Valid @RequestBody DeviceCreateDTO deviceCreateDTO) {
         log.info("Creating new device with name: {}, type: {}, roomId: {}",
                 deviceCreateDTO.getName(), deviceCreateDTO.getType(), deviceCreateDTO.getRoomId());
@@ -115,7 +117,7 @@ public class DeviceController {
 
     @Operation(summary = "Полностью обновить устройство", description = "Обновить все поля существующего устройства по его ID.")
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @PreAuthorize("hasAuthority('device:control')")
     public ResponseEntity<DeviceResponseDTO> updateDeviceFull(@PathVariable @NotNull Long id, @Valid @RequestBody DevicePutDTO devicePutDTO) {
         log.info("Fully updating device with ID: {}", id);
 
@@ -129,7 +131,7 @@ public class DeviceController {
 
     @Operation(summary = "Частично обновить устройство", description = "Обновить определённые поля существующего устройства по его ID.")
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @PreAuthorize("hasAuthority('device:control')")
     public ResponseEntity<DeviceResponseDTO> updateDevicePartially(@PathVariable @NotNull Long id,
             @Valid @RequestBody @NotNull DevicePatchDTO devicePatchDTO) {
         log.info("Partially updating device with ID: {}", id);
@@ -145,7 +147,7 @@ public class DeviceController {
 
     @Operation(summary = "Удалить устройство", description = "Удалить устройство по его уникальному идентификатору.")
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @PreAuthorize("hasAuthority('device:manage')")
     public ResponseEntity<Void> deleteDevice(@PathVariable @NotNull Long id) {
         log.info("Deleting device with ID: {}", id);
 

@@ -54,6 +54,7 @@ public class RoomController {
 
     @Operation(summary = "Получить все комнаты с возможностью фильтрации", description = "Получить список всех комнат с возможностью фильтрации по этажу и названию комнаты.")
     @GetMapping()
+    @PreAuthorize("hasAuthority('room:read')")
     public ResponseEntity<Page<RoomResponseDTO>> getAllRooms(
             @RequestParam(required = false) Integer floor,
             @RequestParam(required = false) String name,
@@ -80,6 +81,7 @@ public class RoomController {
     // Получить комнату по ID
     @Operation(summary = "Получить комнату по ID", description = "Получить информацию о комнате по её уникальному идентификатору.")
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('room:read')")
     public ResponseEntity<RoomResponseDTO> getRoomById(@PathVariable @NotNull Long id) {
         log.info("Getting room by ID: {}", id);
 
@@ -91,7 +93,7 @@ public class RoomController {
     // Создать новую комнату
     @Operation(summary = "Создать новую комнату", description = "Создать новую комнату с указанными параметрами.")
     @PostMapping()
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('room:manage')")
     public ResponseEntity<RoomResponseDTO> createRoom(@Valid @RequestBody RoomCreateDTO createRoomDTO) {
         log.info("Creating new room with name: {}", createRoomDTO.getName());
 
@@ -107,7 +109,7 @@ public class RoomController {
     // Обновить комнату
     @Operation(summary = "Полностью обновить комнату", description = "Полностью обновить информацию о комнате.")
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('room:control')")
     public ResponseEntity<RoomResponseDTO> updateRoomFull(@PathVariable @NotNull Long id,
             @Valid @RequestBody RoomPutDTO roomPutDTO) {
         log.info("Updating room with ID: {}", id);
@@ -122,7 +124,7 @@ public class RoomController {
 
     @Operation(summary = "Частично обновить комнату", description = "Частично обновить информацию о комнате.")
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('room:control')")
     public ResponseEntity<RoomResponseDTO> updateRoomPartially(@PathVariable @NotNull Long id,
             @Valid @RequestBody RoomPatchDTO roomPatchDTO) {
         log.info("Updating room with ID: {}", id);
@@ -138,7 +140,7 @@ public class RoomController {
     // Удалить комнату
     @Operation(summary = "Удалить комнату", description = "Удалить комнату по её уникальному идентификатору.")
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('room:manage')")
     public ResponseEntity<Void> deleteRoom(@PathVariable @NotNull Long id) {
         log.info("Deleting room with ID: {}", id);
 

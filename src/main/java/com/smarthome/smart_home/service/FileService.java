@@ -48,7 +48,6 @@ public class FileService {
             SmartHomeConfigDTO config = objectMapper.readValue(
                 file.getInputStream(), SmartHomeConfigDTO.class);
             
-            // Process Rooms
             if (config.getRooms() != null) {
                 for (RoomImportDTO roomDto : config.getRooms()){
                     Room room = new Room();
@@ -121,7 +120,7 @@ public class FileService {
         try {
             SmartHomeConfigDTO config = new SmartHomeConfigDTO();
 
-            // 1. Маппим комнаты, девайсы и сенсоры
+
             List<RoomImportDTO> roomDtos = roomRepository.findAll().stream().map(room -> {
                 RoomImportDTO rDto = new RoomImportDTO();
                 rDto.setName(room.getName());
@@ -146,7 +145,6 @@ public class FileService {
                 return rDto;
             }).collect(Collectors.toList());
 
-            // 2. Маппим правила автоматизации
             List<AutomationRuleImportDTO> ruleDtos = automationRepository.findAll().stream().map(rule -> {
                 AutomationRuleImportDTO arDto = new AutomationRuleImportDTO();
                 arDto.setName(rule.getName());
@@ -158,7 +156,6 @@ public class FileService {
                 arDto.setAction(rule.getAction());
                 arDto.setActionValue(rule.getActionValue());
                 
-                // Связываем через UUID
                 arDto.setDeviceUuid(rule.getDevice().getUuid());
                 if (rule.getSensor() != null) {
                     arDto.setSensorUuid(rule.getSensor().getUuid());

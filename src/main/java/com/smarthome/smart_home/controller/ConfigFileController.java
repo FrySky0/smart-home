@@ -30,13 +30,12 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/config")
 @RequiredArgsConstructor
 @Tag(name = "Configuration Import", description = "Загрузка конфигурации из файла")
-@PreAuthorize("hasRole('ADMIN')")
 public class ConfigFileController {
     private final FileService fileService;
     private final TelegramService telegramService;
     private final LogService logService;
     @Operation(summary= "Импорт комнат и устройств из JSON файла")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('configuration:import')")
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> importConfig(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal User user){
         telegramService.sendLog("User '" + user.getUsername() + "' started configuration import");
@@ -52,7 +51,7 @@ public class ConfigFileController {
     }
 
     @Operation(summary = "Экспорт всей конфигурации системы в JSON (Отчет)")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('configuration:export')")
     @GetMapping("/export")
     public ResponseEntity<byte[]> exportConfig(@AuthenticationPrincipal User user) {
         telegramService.sendLog("User '" + user.getUsername() + "' started configuration export");

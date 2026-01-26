@@ -45,11 +45,11 @@ public class AutomationRule {
 
     private boolean enabled = true;
     @Enumerated(EnumType.STRING)
-    private TriggerEvent triggerEvent; // больше, меньше или равно (для сенсора), время
-    private Double triggerValue; // значение сенсора по которому триггерится правило
-    private LocalTime triggerTime; // время срабатывания правила, если триггер по времени
+    private TriggerEvent triggerEvent; 
+    private Double triggerValue; 
+    private LocalTime triggerTime;
     @Enumerated(EnumType.STRING)
-    private Action action; // как девайс будет изменен
-    private Double actionValue; // значение которое будет применено к девайсу
+    private Action action; 
+    private Double actionValue;
 
 }

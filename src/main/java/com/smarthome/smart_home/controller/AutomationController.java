@@ -62,6 +62,7 @@ public class AutomationController {
     // Получить все правила
     @Operation(summary = "Получить правила автоматизации с возможностью фильтрации", description="Возвращает страницу правил автоматизации на основе предоставленных фильтров.")
     @GetMapping()
+    @PreAuthorize("hasAuthority('automationrule:read')")
     public ResponseEntity<Page<AutomationRuleResponseDTO>> getAllRules(
             @Parameter(description="Поиск по названию (частичное совпадение)") @RequestParam(required = false) String name,
             @Parameter(description="Поиск по описанию (частичное совпадение)") @RequestParam(required = false) String description,
@@ -97,6 +98,7 @@ public class AutomationController {
     }
     @Operation(summary = "Получить правило автоматизации по ID", description="Возвращает правило автоматизации по его уникальному идентификатору.")
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('automationrule:read')")
     public ResponseEntity<AutomationRuleResponseDTO> getRuleById(@PathVariable Long id) {
         log.info("Getting automation rule by ID: {}", id);
         AutomationRule rule = automationService.getRuleById(id);
@@ -105,26 +107,13 @@ public class AutomationController {
         return ResponseEntity.ok(ruleDTO);
     }
     
-    // @GetMapping("/triggerAll")
-    // @PreAuthorize("hasAnyRole('USER','ADMIN')")
-    // public ResponseEntity<List<AutomationRuleResponseDTO>> triggerAllRules() {
-    //     log.info("Triggering all automation rules");
-    //     List<AutomationRule> triggeredRules = automationService.triggerAll();
-    //     log.info("Successfully triggered {} automation rules", triggeredRules.size());
-    //     log.debug("Triggered rule IDs: {}",
-    //             triggeredRules.stream()
-    //                     .map(AutomationRule::getId)
-    //                     .collect(Collectors.toList()));
-    //     return ResponseEntity.ok(triggeredRules.stream().map(automationRuleMapper::toResponseDTO)
-    //             .collect(Collectors.toList()));
-    // }
     @Operation(summary = "Создать новое правило автоматизации", description="Создает новое правило автоматизации на основе предоставленных данных.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Правило успешно создано"),
         @ApiResponse(responseCode = "400", description = "Ошибка валидации логики правила")
     })
     @PostMapping
-    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @PreAuthorize("hasAuthority('automationrule:manage')")
     public ResponseEntity<AutomationRuleResponseDTO> createAutomationRule(
             @Valid @RequestBody AutomationRuleCreateDTO automationRuleCreateDTO) {
         log.info("Creating new automation rule");
@@ -141,7 +130,7 @@ public class AutomationController {
 
     @Operation(summary = "Полностью обновить правило автоматизации", description="Полностью обновляет существующее правило автоматизации по его уникальному идентификатору на основе предоставленных данных.")
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @PreAuthorize("hasAuthority('automationrule:control')")
     public ResponseEntity<AutomationRuleResponseDTO> updateRule(
             @Valid @RequestBody AutomationRulePutDTO automationRulePutDTO,
             @PathVariable Long id) {
@@ -158,7 +147,7 @@ public class AutomationController {
     }
     @Operation(summary = "Частично обновить правило автоматизации", description="Частично обновляет существующее правило автоматизации по его уникальному идентификатору на основе предоставленных данных.")
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @PreAuthorize("hasAuthority('automationrule:control')")
     public ResponseEntity<AutomationRuleResponseDTO> partiallyUpdateRule(
             @RequestBody AutomationRulePatchDTO automationRulePatchDTO,
             @PathVariable Long id) {
@@ -176,7 +165,7 @@ public class AutomationController {
 
     @Operation(summary = "Удалить правило автоматизации", description="Удаляет существующее правило автоматизации по его уникальному идентификатору.")
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @PreAuthorize("hasAuthority('automationrule:manage')")
     public ResponseEntity<Void> deleteAutomationRule(@PathVariable Long id) {
         log.info("Deleting automation rule with ID: {}", id);
 

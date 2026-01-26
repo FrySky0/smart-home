@@ -13,7 +13,7 @@ public class DeviceResponseDTO {
     private String name;
     private DeviceType type;
     private DeviceStatus status;
-    private Long roomId; // возвращаем только id комнаты, вместо объекта
+    private Long roomId;
     private UUID uuid;
     private Double value;
 

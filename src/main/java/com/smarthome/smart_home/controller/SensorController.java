@@ -61,6 +61,7 @@ public class SensorController {
     // Получить все сенсоры, с возможностью фильтрации по комнате и типу
     @Operation(summary = "Получить все сенсоры с возможностью фильтрации", description = "Получить список всех сенсоров с возможностью фильтрации по комнате и типу сенсора.")
     @GetMapping
+    @PreAuthorize("hasAuthority('sensor:read')")
     public ResponseEntity<Page<SensorResponseDTO>> getAllSensors(
             @Parameter(description="Поиск по названию (частичное совпадение)") @RequestParam(required = false) String name,
             @Parameter(description="Поиск по ID комнаты, в которой стоит этот сенсор") @RequestParam(required = false) Long roomId,
@@ -91,6 +92,7 @@ public class SensorController {
     // Получить сенсор по ID
     @Operation(summary = "Получить сенсор по ID", description = "Получить детали сенсора по его уникальному идентификатору.")
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('sensor:read')")
     public ResponseEntity<SensorResponseDTO> getSensorById(@PathVariable @NotNull Long id) {
         log.info("Getting sensor by ID: {}", id);
 
@@ -102,7 +104,7 @@ public class SensorController {
     // Создать новый сенсор
     @Operation(summary = "Создать новый сенсор", description = "Создать новый сенсор с указанными параметрами.")
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('sensor:manage')")
     public ResponseEntity<SensorResponseDTO> createSensor(@Valid @RequestBody SensorCreateDTO sensorCreateDTO) {
         log.info("Creating new sensor with name: {}, type: {}, roomId: {}, value: {}",
                 sensorCreateDTO.getName(), sensorCreateDTO.getType(), sensorCreateDTO.getRoomId(), sensorCreateDTO.getValue());
@@ -122,7 +124,7 @@ public class SensorController {
     // Обновить сенсор
     @Operation(summary = "Полностью обновить сенсор", description = "Обновить все поля существующего сенсора по его ID.")
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('sensor:control')")
     public ResponseEntity<SensorResponseDTO> updateSensorFull(@PathVariable @NotNull Long id,
             @Valid @RequestBody SensorPutDTO sensorPutDTO) {
         log.info("Fully updating sensor ID: {}", id);
@@ -136,7 +138,7 @@ public class SensorController {
     }
     @Operation(summary = "Частично обновить сенсор", description = "Обновить определённые поля существующего сенсора по его ID.")
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('sensor:control')")
     public ResponseEntity<SensorResponseDTO> updateSensorPartially(@PathVariable @NotNull Long id,
             @Valid @RequestBody @NotNull SensorPatchDTO sensorPatchDTO) {
         log.info("Partially updating sensor with ID: {}", id);
@@ -153,7 +155,7 @@ public class SensorController {
     // Удалить сенсор
     @Operation(summary = "Удалить сенсор", description = "Удалить сенсор по его уникальному идентификатору.")
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('sensor:manage')")
     public ResponseEntity<Void> deleteSensor(@PathVariable @NotNull Long id) {
         log.info("Deleting sensor with ID: {}", id);
 

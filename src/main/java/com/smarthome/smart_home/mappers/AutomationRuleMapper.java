@@ -53,23 +53,4 @@ public class AutomationRuleMapper {
         return dto;
     }
 
-    // public AutomationRuleDTO toDTO(AutomationRule rule) {
-    //     AutomationRuleDTO dto = new AutomationRuleDTO();
-    //     dto.setName(rule.getName());
-    //     dto.setDescription(rule.getDescription());
-    //     dto.setEnabled(rule.isEnabled());
-    //     dto.setDeviceUuid(rule.getDevice().getUuid());
-    //     if (rule.getSensor() != null) {
-    //         dto.setSensorUuid(rule.getSensor().getUuid());
-    //     } else {
-    //         dto.setSensorUuid(null);
-    //     }
-    //     dto.setTriggerEvent(rule.getTriggerEvent());
-    //     dto.setTriggerValue(rule.getTriggerValue());
-    //     dto.setTriggerTime(rule.getTriggerTime());
-    //     dto.setAction(rule.getAction());
-    //     dto.setActionValue(rule.getActionValue());
-    //     return dto;
-    // }
-
 }

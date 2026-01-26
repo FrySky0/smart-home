@@ -33,18 +33,14 @@ public class ReportController {
 
     @Operation(summary = "Скачать PDF-отчет по истории событий")
     @GetMapping("/activity")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('systemreport:download')")
     public ResponseEntity<byte[]> downloadActivityReport(@AuthenticationPrincipal User user) {
-        // Логируем действие в консоль и телеграм
         telegramService.sendLog("User '" + user.getUsername() + "' generated a PDF activity report");
 
         byte[] reportContent = reportService.generateActivityReportPDF();
 
-        // Формируем HTTP-ответ с файлом
         return ResponseEntity.ok()
-                // Content-Disposition заставляет браузер именно скачивать файл
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=activity_report.pdf")
-                // Указываем тип контента как PDF
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(reportContent);
     }

@@ -2,6 +2,7 @@ package com.smarthome.smart_home.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,10 +40,6 @@ public class LogService {
     }
 
     public List<ActivityLog> getLastEvents(int limit) {
-        // Нужно будет добавить метод в репозиторий: findAllByOrderByTimestampDesc
-        return logRepository.findAll().stream()
-                .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
-                .limit(limit)
-                .toList();
+        return logRepository.findAllByOrderByTimestampDesc(PageRequest.of(0, limit));
     }
 }
