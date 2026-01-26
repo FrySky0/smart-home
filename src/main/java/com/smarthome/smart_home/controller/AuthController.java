@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.smarthome.smart_home.dto.auth.AuthRequestDTO;
+import com.smarthome.smart_home.dto.auth.AuthRequestLoginDTO;
 import com.smarthome.smart_home.dto.auth.AuthResponseDTO;
 import com.smarthome.smart_home.dto.auth.PasswordChangeRequestDTO;
 import com.smarthome.smart_home.enums.activitylog.ComponentName;
@@ -71,7 +72,7 @@ public class AuthController {
     }
     @Operation(summary = "Вход пользователя", description = "Аутентификация пользователя с указанием имени и пароля.")
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody AuthRequestDTO authRequest, 
+    public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody AuthRequestLoginDTO authRequest, 
                                                 HttpServletResponse response) {
         log.info("Login attempt for user: {}", authRequest.getUsername());
         

@@ -18,7 +18,8 @@ import com.smarthome.smart_home.model.AutomationRule;
 @Repository
 public interface AutomationRepository extends JpaRepository<AutomationRule, Long> {
         List<AutomationRule> findByEnabledAndSensorId(boolean enabled, Long triggeredSensorId);
-
+        boolean existsByDeviceId(Long id);
+        boolean existsBySensorId(Long id);
         List<AutomationRule> findByEnabled(boolean enabled);
 
         @Query("SELECT r FROM AutomationRule r " +

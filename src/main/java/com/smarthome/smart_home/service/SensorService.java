@@ -13,9 +13,11 @@ import com.smarthome.smart_home.dto.update.patch.SensorPatchDTO;
 import com.smarthome.smart_home.dto.update.put.SensorPutDTO;
 import com.smarthome.smart_home.enums.SensorType;
 import com.smarthome.smart_home.events.SensorUpdatedEvent;
+import com.smarthome.smart_home.exception.ResourceInUseException;
 import com.smarthome.smart_home.exception.ResourceNotFoundException;
 import com.smarthome.smart_home.model.Room;
 import com.smarthome.smart_home.model.Sensor;
+import com.smarthome.smart_home.repository.AutomationRepository;
 import com.smarthome.smart_home.repository.SensorRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class SensorService {
     private final SensorRepository sensorRepository;
     private final RoomService roomService;
     private final ApplicationEventPublisher eventPublisher;
+    private final AutomationRepository automationRepository;
 
     public Sensor getSensorById(Long id) {
         log.debug("Looking for sensor with ID: {}", id);
@@ -107,6 +110,9 @@ public class SensorService {
         if (!sensorRepository.existsById(id)) {
             log.error("Cannot delete sensor - sensor not found with id: {}", id);
             throw new ResourceNotFoundException("Sensor not found with id: " + id);
+        }
+        if (automationRepository.existsBySensorId(id)){
+            throw new ResourceInUseException("Нельзя удалить сенсор с ID: "+id+", так как он задействован в правилах автоматизации.");
         }
         sensorRepository.deleteById(id);
         log.info("Successfully deleted sensor with ID: {}", id);

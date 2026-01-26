@@ -12,10 +12,12 @@ import com.smarthome.smart_home.dto.update.patch.DevicePatchDTO;
 import com.smarthome.smart_home.dto.update.put.DevicePutDTO;
 import com.smarthome.smart_home.enums.DeviceStatus;
 import com.smarthome.smart_home.enums.DeviceType;
+import com.smarthome.smart_home.exception.ResourceInUseException;
 import com.smarthome.smart_home.exception.ResourceNotFoundException;
 import com.smarthome.smart_home.mappers.DeviceMapper;
 import com.smarthome.smart_home.model.Device;
 import com.smarthome.smart_home.model.Room;
+import com.smarthome.smart_home.repository.AutomationRepository;
 import com.smarthome.smart_home.repository.DeviceRepository;
 
 import jakarta.validation.ValidationException;
@@ -30,6 +32,7 @@ public class DeviceService {
     private final DeviceRepository deviceRepository;
     private final DeviceMapper deviceMapper;
     private final RoomService roomService;
+    private final AutomationRepository automationRepository;
 
     public Page<Device> getDevicesByFilters(String name,Long roomId, DeviceType type, DeviceStatus status, Pageable pageable) {
         log.debug("Fetching devices with filters - name: {}, roomId: {}, type: {}, status: {}, pageable: {}",
@@ -164,6 +167,9 @@ public class DeviceService {
         if (!deviceRepository.existsById(id)) {
             log.error("Device not found for deletion with id: {}", id);
             throw new ResourceNotFoundException("Device not found with id: " + id);
+        }
+        if (automationRepository.existsByDeviceId(id)){
+            throw new ResourceInUseException("Нельзя удалить устройство с ID: "+id+", так как оно задействовано в правилах автоматизации.");
         }
         deviceRepository.deleteById(id);
         log.info("Successfully deleted device with id: {}", id);
