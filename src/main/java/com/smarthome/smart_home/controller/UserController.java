@@ -35,6 +35,7 @@ import com.smarthome.smart_home.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -90,7 +91,7 @@ public class UserController {
     @PutMapping("/{id}")
     @Operation(summary = "Полностью обновить пользователя")
     @PreAuthorize("hasAuthority('users:manage')")
-    public ResponseEntity<UserResponseDTO> updateUserFull(@PathVariable Long id, @RequestBody UserPutDTO userPutDTO) {
+    public ResponseEntity<UserResponseDTO> updateUserFull(@PathVariable Long id, @Valid @RequestBody UserPutDTO userPutDTO) {
         log.info("Fully updating user with ID: {}", id);
         User user = userService.updateFull(id, userPutDTO);
         UserResponseDTO userDTO = userMapper.toResponseDTO(user);
@@ -103,7 +104,7 @@ public class UserController {
     @PatchMapping("/{id}")
     @Operation(summary = "Частично обновить пользователя")
     @PreAuthorize("hasAuthority('users:manage')")
-    public ResponseEntity<UserResponseDTO> updateUserPartially(@PathVariable Long id, @RequestBody UserPatchDTO userPatchDTO) {
+    public ResponseEntity<UserResponseDTO> updateUserPartially(@PathVariable Long id, @Valid @RequestBody UserPatchDTO userPatchDTO) {
         log.info("Partially updating user with ID: {}", id);
         User user = userService.updatePartially(id, userPatchDTO);
         UserResponseDTO userDTO = userMapper.toResponseDTO(user);

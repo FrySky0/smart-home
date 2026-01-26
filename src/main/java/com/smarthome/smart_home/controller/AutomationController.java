@@ -149,7 +149,7 @@ public class AutomationController {
     @PatchMapping("/{id}")
     @PreAuthorize("hasAuthority('automationrule:control')")
     public ResponseEntity<AutomationRuleResponseDTO> partiallyUpdateRule(
-            @RequestBody AutomationRulePatchDTO automationRulePatchDTO,
+            @Valid @RequestBody AutomationRulePatchDTO automationRulePatchDTO,
             @PathVariable Long id) {
         log.info("Partially updating automation rule with ID: {}", id);
         log.debug("Partial update DTO for rule {}: {}", id, automationRulePatchDTO);
